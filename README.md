@@ -10,26 +10,33 @@ work — so a partial manuscript never gets fabricated results.
 
 ## What's in here
 
+This repo is a **Claude Code plugin marketplace** (`.claude-plugin/marketplace.json`) named **`skills-paper`**,
+providing the **`ai-paper`** plugin:
+
 ```
 skills_paper/
-├── SKILL.md                                   # the Claude skill definition (rules + workflow)
+├── .claude-plugin/
+│   └── marketplace.json                       # marketplace manifest (lists plugins)
+├── README.md
 ├── AI-Paper.md                                # standalone, self-contained companion spec (whole skill in one file)
 ├── thesis_guidelines_master.md                # version-independent thesis / technical-report master template
-└── templates/
-    ├── AI_Paper_Writing_Skill_complete.md     # ALL rules + ALL sections inline (portable single file)
-    ├── MASTER_PAPER_template.md               # global rules + full paper skeleton — READ FIRST
-    └── sections/
-        ├── INTRODUCTION_template.md           # §I  (6 moves, gap↔contribution)
-        ├── METHODOLOGY_template.md            # §II (A data · B transform · C model · D loss/eval)
-        ├── EXPERIMENTS_template.md            # §III (setup · compare · ablation · field)
-        ├── GENERALIZATION_FINETUNING_template.md  # §IV capability demonstration
-        ├── APPLICATION_DOWNSTREAM_template.md      # §V downstream application
-        └── CONCLUSION_template.md             # §VI contribution-mirror recap
+└── plugins/
+    └── ai-paper/                              # the plugin
+        ├── .claude-plugin/
+        │   └── plugin.json                    # plugin manifest
+        └── skills/
+            └── ai-paper/
+                ├── SKILL.md                   # the Claude skill definition (rules + workflow)
+                └── templates/
+                    ├── AI_Paper_Writing_Skill_complete.md   # ALL rules + ALL sections inline (portable)
+                    ├── MASTER_PAPER_template.md             # global rules + full paper skeleton — READ FIRST
+                    └── sections/                            # §I Introduction … §VI Conclusion templates
 ```
 
-- **Just want to write a paper now?** Read `templates/MASTER_PAPER_template.md` first, then the relevant
-  `templates/sections/*.md`. Everything is also inlined in `templates/AI_Paper_Writing_Skill_complete.md`.
-- **Want it as an auto-loading Claude skill?** Install `SKILL.md` (see below).
+- **Easiest in Claude Code?** Add the marketplace and install the plugin (see Install → Option A).
+- **Just want to write a paper now (any LLM)?** Read
+  `plugins/ai-paper/skills/ai-paper/templates/MASTER_PAPER_template.md` first, then the relevant `sections/*.md`.
+  Everything is also inlined in `AI-Paper.md` (root) and `…/templates/AI_Paper_Writing_Skill_complete.md`.
 
 ---
 
@@ -44,25 +51,33 @@ cd skills_paper
 
 ## Install
 
-### Option A — as a Claude Code skill (auto-discovered)
+### Option A — as a Claude Code plugin marketplace (recommended)
 
-Claude Code loads skills from your skills directory. Copy the skill folder so the layout is
-`.../skills/ai-paper/SKILL.md` (+ its `templates/`):
+This repo is a **Claude Code plugin marketplace** (`.claude-plugin/marketplace.json`), so you can add it and
+install the plugin directly inside Claude Code — no manual file copying:
 
-```bash
-# user-level skills (available in every project)
-mkdir -p ~/.claude/skills/ai-paper
-cp -a SKILL.md templates ~/.claude/skills/ai-paper/
-
-# OR project-level (only this repo/project)
-mkdir -p .claude/skills/ai-paper
-cp -a SKILL.md templates .claude/skills/ai-paper/
+```text
+/plugin marketplace add mklayek/skills_paper     # register this repo as a marketplace
+/plugin install ai-paper@skills-paper            # install the plugin (name@marketplace)
+/plugin                                           # browse / manage installed plugins
+/plugin marketplace update skills-paper           # pull the latest after new commits
 ```
 
-> Path note: some Claude Code setups use a plugin marketplace dir
-> (e.g. `~/.claude-oh/local-marketplace/plugins/ai-paper/skills/ai-paper/`). If yours does, copy into that
-> `skills/ai-paper/` location instead. The only requirement is that `SKILL.md` sits in a folder named `ai-paper`
-> with its `templates/` beside it.
+The marketplace is named **`skills-paper`** and provides the **`ai-paper`** plugin (which carries the
+`ai-paper` skill under `plugins/ai-paper/skills/ai-paper/`).
+
+### Option B — manual skill copy (no marketplace)
+
+Copy the skill folder so the layout is `.../skills/ai-paper/SKILL.md` (+ its `templates/`):
+
+```bash
+git clone https://github.com/mklayek/skills_paper.git
+mkdir -p ~/.claude/skills
+cp -a skills_paper/plugins/ai-paper/skills/ai-paper ~/.claude/skills/   # user-level (all projects)
+# OR project-level:  cp -a skills_paper/plugins/ai-paper/skills/ai-paper .claude/skills/
+```
+
+> The only requirement is that `SKILL.md` sits in a folder named `ai-paper` with its `templates/` beside it.
 
 Restart / reopen Claude Code so it re-scans skills. Verify it loaded by checking the available-skills list (the
 skill is named **`ai-paper`**).

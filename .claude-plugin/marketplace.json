@@ -1,0 +1,14 @@
+{
+  "name": "skills-paper",
+  "description": "GeoAI / deep-learning paper-writing skills marketplace (Ge-style manuscripts + templates).",
+  "owner": { "name": "mklayek", "email": "layek.mk@gmail.com" },
+  "plugins": [
+    {
+      "name": "ai-paper",
+      "description": "Write DL / GPR / geophysics / remote-sensing papers or sections in Ge-style; preserves headings and inserts 'Yet to be developed' for unfinished work.",
+      "source": "./plugins/ai-paper",
+      "author": { "name": "Mrinal Kanti Layek" },
+      "category": "writing"
+    }
+  ]
+}
