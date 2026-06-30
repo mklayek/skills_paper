@@ -1,0 +1,6 @@
+{
+  "name": "compose-plan",
+  "description": "Generate structured development plans for geophysics, GPR, seismic, and AI/ML scientific-computing projects.",
+  "version": "1.0.0",
+  "author": { "name": "Mrinal Kanti Layek", "email": "layek.mk@gmail.com" }
+}

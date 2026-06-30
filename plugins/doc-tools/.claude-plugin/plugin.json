@@ -1,0 +1,6 @@
+{
+  "name": "doc-tools",
+  "description": "Read, maintain, and update research/project documentation (.md/.txt/.pdf/.doc/.xls): doc-reader, documentation-agent, md-updater.",
+  "version": "1.0.0",
+  "author": { "name": "Mrinal Kanti Layek", "email": "layek.mk@gmail.com" }
+}

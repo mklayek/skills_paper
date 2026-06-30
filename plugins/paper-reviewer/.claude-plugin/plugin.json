@@ -1,0 +1,6 @@
+{
+  "name": "paper-reviewer",
+  "description": "Analyze academic paper PDFs from a journal reviewer's perspective and generate a comprehensive review report.",
+  "version": "1.0.0",
+  "author": { "name": "Mrinal Kanti Layek", "email": "layek.mk@gmail.com" }
+}

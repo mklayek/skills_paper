@@ -1,0 +1,6 @@
+{
+  "name": "research-gap",
+  "description": "Identify research gaps from uploaded papers/links and generate novel research project proposals.",
+  "version": "1.0.0",
+  "author": { "name": "Mrinal Kanti Layek", "email": "layek.mk@gmail.com" }
+}
