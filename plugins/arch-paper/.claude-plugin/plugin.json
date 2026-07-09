@@ -1,0 +1,17 @@
+{
+  "name": "arch-paper",
+  "description": "Write archaeological GPR (ground-penetrating-radar) papers or any section in Goodman-lineage house style, with a five-tier interpretation discipline, reusable per-section templates, and an honest 'Yet to be developed' policy.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": [
+    "paper-writing",
+    "archaeological-geophysics",
+    "gpr",
+    "time-slice",
+    "depth-slice",
+    "templates"
+  ]
+}

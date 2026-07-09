@@ -1,41 +1,63 @@
 {
   "name": "skills-paper",
   "description": "Research-paper lifecycle skills for GeoAI / deep-learning / GPR projects: plan, find gaps, write (Ge-style), review, and maintain docs.",
-  "owner": { "name": "mklayek", "email": "layek.mk@gmail.com" },
+  "owner": {
+    "name": "mklayek",
+    "email": "layek.mk@gmail.com"
+  },
   "plugins": [
     {
       "name": "ai-paper",
       "description": "Write DL/GPR/geophysics/remote-sensing papers or sections in Ge-style; preserves headings and inserts 'Yet to be developed' for unfinished work.",
       "source": "./plugins/ai-paper",
-      "author": { "name": "Mrinal Kanti Layek" },
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "writing"
+    },
+    {
+      "name": "arch-paper",
+      "description": "Write archaeological GPR papers or sections in Goodman house style; five-tier interpretation discipline; 'Yet to be developed' for unfinished work.",
+      "source": "./plugins/arch-paper",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
       "category": "writing"
     },
     {
       "name": "paper-reviewer",
       "description": "Analyze academic paper PDFs from a journal reviewer's perspective and generate a comprehensive review report.",
       "source": "./plugins/paper-reviewer",
-      "author": { "name": "Mrinal Kanti Layek" },
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
       "category": "review"
     },
     {
       "name": "research-gap",
       "description": "Identify research gaps from uploaded papers/links and generate novel research project proposals.",
       "source": "./plugins/research-gap",
-      "author": { "name": "Mrinal Kanti Layek" },
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
       "category": "research"
     },
     {
       "name": "compose-plan",
       "description": "Generate structured development plans for geophysics, GPR, seismic, and AI/ML scientific-computing projects.",
       "source": "./plugins/compose-plan",
-      "author": { "name": "Mrinal Kanti Layek" },
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
       "category": "planning"
     },
     {
       "name": "doc-tools",
       "description": "Read, maintain, and update research/project documentation (.md/.txt/.pdf/.doc/.xls): doc-reader, documentation-agent, md-updater.",
       "source": "./plugins/doc-tools",
-      "author": { "name": "Mrinal Kanti Layek" },
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
       "category": "documentation"
     }
   ]
