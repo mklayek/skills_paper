@@ -20,7 +20,7 @@ manuscripts never get fabricated results.
 | **`research-gap`** | `research-gap` | Identify research gaps from uploaded papers/links and propose novel research projects. |
 | **`compose-plan`** | `compose-plan` | Generate structured development plans for geophysics / GPR / seismic / AI-ML projects. |
 | **`paper-reviewer`** | `review` | Analyze a paper PDF as a rigorous journal reviewer → comprehensive review report. |
-| **`doc-tools`** | `doc-readermkl`, `documentation-agent`, `md-updater` | Read, maintain, and update project/research docs (.md/.txt/.pdf/.doc/.xls). |
+| **`doc-tools`** | `doc-readermkl`, `documentation-agent`, `md-updater`, `methods-read-doc` | Read, maintain, update, and **explain** project/research docs (.md/.txt/.pdf/.doc/.xls); `methods-read-doc` builds beginner-accessible math/methods "read" explainers (per-symbol glossaries, boxed definitions, schematics) with matching PDF/DOCX. |
 
 ---
 
@@ -38,7 +38,7 @@ skills_paper/
     ├── research-gap/     .claude-plugin/plugin.json + skills/research-gap/SKILL.md
     ├── compose-plan/     .claude-plugin/plugin.json + skills/compose-plan/SKILL.md
     ├── paper-reviewer/   .claude-plugin/plugin.json + skills/review/SKILL.md
-    └── doc-tools/        .claude-plugin/plugin.json + skills/{doc-readermkl,documentation-agent,md-updater}/SKILL.md
+    └── doc-tools/        .claude-plugin/plugin.json + skills/{doc-readermkl,documentation-agent,md-updater,methods-read-doc}/SKILL.md
 ```
 
 ---

@@ -53,7 +53,7 @@
     },
     {
       "name": "doc-tools",
-      "description": "Read, maintain, and update research/project documentation (.md/.txt/.pdf/.doc/.xls): doc-reader, documentation-agent, md-updater.",
+      "description": "Read, maintain, update, and explain research/project documentation (.md/.txt/.pdf/.doc/.xls): doc-reader, documentation-agent, md-updater, methods-read-doc.",
       "source": "./plugins/doc-tools",
       "author": {
         "name": "Mrinal Kanti Layek"
