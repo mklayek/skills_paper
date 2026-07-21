@@ -50,25 +50,35 @@ term definition and gets the ✪ star; a bullet opening with prose keeps the ☑
 
 ## Equation pretext — REQUIRED
 
-**Every `$$…$$` is immediately preceded by a `-` statement that names what the equation
-says and ends in a bolded connecting phrase plus a colon.** That statement is the
-equation's main description — it is what the audience reads, so it carries the emphasis.
+**Every `$$…$$` is immediately preceded by a `-` statement saying what the equation
+establishes, ending in a PLAIN connecting phrase and a colon.** Emphasis goes on the
+substance, never on the connector — bold the phrase naming what the equation makes
+explicit, defines, estimates or bounds. That phrase renders dark brown.
 
 ```
-- The curvelet coefficient is the inner product of the image with one atom, **expressed as below:**
-$$ \Gamma_f(a,\theta,b)=\langle f,\gamma_{a,\theta,b}\rangle $$ (5)
+- Writing the atom directly in the frequency plane at integer scale $j$, in polar
+  coordinates $(r,\vartheta)$, makes the **discrete construction explicit**, given by:
+$$ \tilde U_{j,\ell}(\omega)=\tilde W_j(\omega)\,\tilde V_{j,\ell}(\omega) $$ (18)
 ```
 
-Connecting phrases to rotate between (always bolded, always ending in `:`):
-`**expressed as below:**` · `**formulated as below:**` · `**described as:**` ·
-`**written as:**` · `**given by:**` · `**stated as below:**` · `**defined as below:**`
+| | |
+|---|---|
+| ✅ | `…makes the **discrete construction explicit**, given by:` |
+| ❌ | `…makes the discrete construction explicit, **given by:**` — connector bolded, substance plain |
+| ❌ | `**Given by:**` — no description at all |
 
-- Never drop an equation straight after a bullet ending in a full stop, and never let an
-  equation open a slide with no lead-in.
-- Say what the equation *means* first, then the connector: "…turns that footprint into the
-  atom's shape in space, **formulated as below:**" — not a bare "**given by:**".
-- `build_styled_slides.py` prints `WARN: equation (N) has no lead-in` for violations.
-  A clean build has none.
+Connectors, always **plain** and ending in `:` — vary them so the deck does not read
+mechanically, and pick the one that fits the sentence grammatically:
+`given by:` · `expressed as below:` · `formulated as below:` · `described as:` ·
+`written as:` · `stated as below:` · `defined as below:`
+
+- Exactly **one** bold phrase per lead-in, 2–5 words: **term count**, **exact
+  reconstruction**, **anisotropic dilation matrix**, **tight-frame property**.
+- Never drop an equation after a bullet ending in a full stop; never open a slide with an
+  equation that has no lead-in.
+- `==yellow==` is a different marker — do not use it for this.
+- `build_styled_slides.py` warns on a missing lead-in, a missing connector, a **bolded
+  connector**, and a lead-in with no bold phrase. A clean build has zero warnings.
 
 ## Build commands
 

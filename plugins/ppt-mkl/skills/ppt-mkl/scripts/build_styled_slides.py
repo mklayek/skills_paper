@@ -464,26 +464,39 @@ CONNECTORS = ("expressed as below", "formulated as below", "described as",
 
 
 def lint_pretext(slides) -> int:
-    """Every display equation needs a lead-in statement ending in a connector + colon.
+    """Check the equation-pretext rule on every display equation.
 
-    The lead-in is the equation's main description — what the audience actually reads —
-    so a bare equation dropped after a full stop is a content bug, not a style nit.
+    A display equation must be introduced by a statement that says what it establishes,
+    ending in a PLAIN connector plus a colon, with the substantive phrase — what the
+    equation makes explicit — in bold. Bolding the connector instead puts the emphasis on
+    "given by:" rather than on the physics, which is the mistake this catches.
     """
     n = 0
+
+    def warn(tag, msg, title):
+        print(f'  WARN: equation ({tag or "-"}) {msg}  [slide: {title[:52]}]')
+
     for sl in slides:
         prev = None
         for b in sl.blocks:
             if b.kind == "eq":
-                txt = (prev.text.rstrip() if prev is not None and prev.kind == "bullet" else "")
-                txt = re.sub(r"[*_`\s]+$", "", txt)   # the colon sits inside "**...:**"
+                raw = (prev.text.rstrip() if prev is not None and prev.kind == "bullet" else "")
+                txt = re.sub(r"[*_`\s]+$", "", raw)
+                bolds = re.findall(r"\*\*(.+?)\*\*", raw)
+                connector_bolded = any(
+                    c in bb.lower() for bb in bolds for c in CONNECTORS)
+                substantive = [bb for bb in bolds
+                               if not any(c in bb.lower() for c in CONNECTORS)]
                 if not txt.endswith(":"):
-                    n += 1
-                    print(f'  WARN: equation ({b.tag or "-"}) has no lead-in  '
-                          f'[slide: {sl.title[:52]}]')
+                    n += 1; warn(b.tag, "has no lead-in", sl.title)
                 elif not any(c in txt.lower() for c in CONNECTORS):
-                    n += 1
-                    print(f'  WARN: equation ({b.tag or "-"}) lead-in has no connecting '
-                          f'phrase  [slide: {sl.title[:52]}]')
+                    n += 1; warn(b.tag, "lead-in has no connecting phrase", sl.title)
+                elif connector_bolded:
+                    n += 1; warn(b.tag, "connector is bolded (bold the substance instead)",
+                                 sl.title)
+                elif not substantive:
+                    n += 1; warn(b.tag, "lead-in has no bold phrase naming what the "
+                                        "equation establishes", sl.title)
             prev = b
     return n
 

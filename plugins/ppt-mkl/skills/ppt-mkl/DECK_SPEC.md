@@ -40,30 +40,37 @@ Blank lines are ignored. Never use plain markdown headings, tables, HTML, or fen
 
 ## Equation pretext (MANDATORY)
 
-**Every `$$ … $$` line MUST be immediately preceded by a `-` bullet that states what the
-equation says and ends with a bolded connecting phrase and a colon.** This lead-in is the
-equation's main description and carries the emphasis; the maths is the evidence for it.
+**Every `$$ … $$` MUST be immediately preceded by a `-` bullet saying what the equation
+establishes, ending in a PLAIN connecting phrase and a colon.** The emphasis goes on the
+substance, never on the connector: bold the phrase naming what the equation makes explicit,
+defines, estimates or bounds. That bold phrase renders dark brown.
 
 ```
-- The curvelet coefficient is the inner product of the image with one atom, **expressed as below:**
-$$ \Gamma_f(a,\theta,b)=\langle f,\gamma_{a,\theta,b}\rangle $$ (5)
+- Writing the atom directly in the frequency plane at integer scale $j$, in polar coordinates $(r,\vartheta)$, makes the **discrete construction explicit**, given by:
+$$ \tilde U_{j,\ell}(\omega)=\tilde W_j(\omega)\,\tilde V_{j,\ell}(\omega) $$ (18)
 ```
 
-Rotate between these connectors so the deck does not read mechanically — always bolded,
-always ending in `:`
+- ✅ `…makes the **discrete construction explicit**, given by:`
+- ❌ `…makes the discrete construction explicit, **given by:**` — connector bolded, substance left plain
+- ❌ `**Given by:**` — no description of what the equation does
 
-`**expressed as below:**` · `**formulated as below:**` · `**described as:**` ·
-`**written as:**` · `**given by:**` · `**stated as below:**` · `**defined as below:**`
+Connectors — always **plain**, always ending in `:`, varied so the deck does not read
+mechanically, and chosen to fit the sentence grammatically:
 
-- State the MEANING first, then the connector. Good: "…the uncertainty principle turns that
-  footprint into the atom's shape in space, **formulated as below:**". Bad: "**Given by:**".
+`given by:` · `expressed as below:` · `formulated as below:` · `described as:` ·
+`written as:` · `stated as below:` · `defined as below:`
+
+- Exactly **one** bold phrase per lead-in, 2-5 words — e.g. **term count**,
+  **exact reconstruction**, **anisotropic dilation matrix**, **tight-frame property**.
 - Never let an equation follow a bullet that ends in a full stop.
 - Never open a slide with an equation that has no lead-in bullet.
-- The builder warns `WARN: equation (N) has no lead-in` — a clean build has zero warnings.
+- `==yellow highlight==` is a different marker — never use it for the pretext.
+- The builder warns on: no lead-in · no connector · bolded connector · no bold phrase.
+  A clean build has zero warnings.
 
 ## Content pattern to follow per equation (this is the deck's rhythm)
-1. one `-` lead-in bullet stating WHY the equation is needed, ending in a bolded
-   connecting phrase and a colon (see "Equation pretext" above — this is mandatory);
+1. one `-` lead-in bullet stating what the equation establishes, with that substance in
+   bold and a PLAIN connector + colon at the end (see "Equation pretext" — mandatory);
 2. the `$$ … $$ (N)` line — **the number N must be exactly the `\tag{N}` from the source**;
 3. `-` or `--` bullets defining each symbol (from the source's "Symbols in (N)" list, shortened);
 4. `!key:` the one-sentence result;

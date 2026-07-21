@@ -12,11 +12,11 @@
 !note: The generating group is the set of three geometric operations — parabolic dilation, rotation, translation.
 
 == CCT : Frequency-domain construction and **admissibility**
-- For the family to tile frequency without gaps or overlaps in energy, $W$ and $V$ must satisfy **admissibility** conditions — unit total energy under the scale-invariant (Haar) measures, **expressed as below:**
+- For the family to tile frequency without gaps or overlaps in energy, $W$ and $V$ must satisfy admissibility conditions — **unit total energy** under the scale-invariant (Haar) measures, expressed as below:
 $$ \int_{0}^{\infty} W(r)^2\,\frac{dr}{r}\ =\ 1, \qquad\qquad \int_{-\infty}^{\infty} V(t)^2\,dt\ =\ 1 $$ (7)
 - $W(r)^2$ or $V(t)^2$ — energy density.
 - $t=(\theta_\xi-\theta)/\sqrt{a}$ — the scaled-angle variable.
-- Equation (7) directly yields the ==partition of unity== underlying the tight-frame property, **formulated as below:**
+- Equation (7) directly yields the **partition of unity** underlying the tight-frame property, formulated as below:
 $$ \sum_{\text{scales}}\ \sum_{\text{orientations}} \big|\,W(a|\xi|)\,V(\cdot)\,\big|^{2}\ =\ 1 \qquad\text{for a.e. }\xi\neq 0 $$ (8)
 - $\sum_{\text{scales}}\sum_{\text{orientations}}$ — the double sum over every ring and every wedge.
 - $|W(a|\xi|)\,V(\cdot)|^{2}$ — the squared magnitude of each ring x wedge window product.
