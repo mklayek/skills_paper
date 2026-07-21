@@ -41,9 +41,10 @@ correctly. The scripts here do that via pandoc; writing your own builder loses i
 | `$$ latex $$ (7)` | centred equation + red `---(7)` in its own right-margin box |
 | `!key:` / `!so:` | bold takeaway / purple Segoe Script "Therefore…" |
 | `!fig: /abs/f.png 55%` | bottom-anchored figure |
+| `!ref: Author (year). Title. Journal…` | reference entry — dark blue italic Comic Sans, fixed 20 pt |
 | `!note:` | speaker note |
 
-Inline: `$math$` · `**maroon term**` · `==yellow highlight==`
+Inline: `$math$` · `**maroon term**` · `==yellow highlight==` · `@@Author (year)@@` citation
 
 A bullet that **opens with maths** (`$a>0$ — continuous scale`) is auto-detected as a
 term definition and gets the ✪ star; a bullet opening with prose keeps the ☑.
@@ -138,5 +139,13 @@ for n in z.namelist() if n.startswith('ppt/slides/slide')))" out.pptx
 ## Style contract (do not drift)
 
 Times New Roman prose · Cambria Math equations · Segoe Script only for the purple
-"Therefore…" line · red `C00000` key phrases and equation tags · maroon `7B2D26` terms ·
-green `2E7D32` checkbox · grey+orange rule under the title · footer = date | label | page.
+"Therefore…" line · **Comic Sans MS italic dark blue `1F3864` at a fixed 20 pt for every
+reference and inline citation** · red `C00000` key phrases and equation tags · maroon
+`7B2D26` terms · green `2E7D32` checkbox · grey+orange rule under the title ·
+footer = date | label | page.
+
+**References** — put every reference on a `!ref:` line, ~5 per slide (they are never
+auto-shrunk, so more will overflow). Cite in body text with `@@Author (year)@@`. Follow the
+reference slides with a short section stating, point-wise, what each cited work contributed
+and where it is used in the deck — grouped by role (foundations, algorithm, theory,
+applications), not listed alphabetically.

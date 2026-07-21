@@ -63,12 +63,14 @@ C_FOOT = "808080"
 C_RULE_ORANGE = "E8722C"
 C_RULE_GREY = "404040"
 C_FRAME = "BFBFBF"
+C_REF = "1F3864"        # dark blue — references and inline citations
 
 F_TITLE = "Times New Roman"
 F_BODY = "Times New Roman"   # all prose: title, bullets, footer
 F_HAND = "Segoe Script"        # reserved for the purple "Therefore, ..." line
 F_SYM = "Segoe UI Symbol"
 F_MATH = "Cambria Math"
+F_REF = "Comic Sans MS"        # references / citations
 
 # geometry (inches)
 M_L, M_R = 0.30, 0.30
@@ -83,6 +85,7 @@ SZ = {0: 20.0, 1: 18.0, 2: 16.0}   # pt per bullet level
 SZ_EQ = 20.0
 SZ_KEY = 20.0
 SZ_SO = 19.0
+SZ_REF = 20.0                  # references are fixed at 20 pt, never auto-shrunk
 MIN_SCALE = 0.62
 
 NSMAP = {
@@ -159,6 +162,9 @@ def parse_deck(path: str) -> list[Slide]:
             continue
         if s.startswith("!key:"):
             cur.blocks.append(Block("key", s[5:].strip()))
+            continue
+        if s.startswith("!ref:"):
+            cur.blocks.append(Block("ref", s[5:].strip()))
             continue
         if s.startswith("!so:"):
             cur.blocks.append(Block("so", s[4:].strip()))
@@ -328,7 +334,7 @@ def text_run(txt: str, size_pt: float, **kw) -> str:
     return f"<a:r>{rpr(size_pt, **kw)}<a:t>{esc(txt)}</a:t></a:r>"
 
 
-TOKEN = re.compile(r"(\$[^$]+?\$|\*\*.+?\*\*|==.+?==|\*[^*\n]+?\*)")
+TOKEN = re.compile(r"(\$[^$]+?\$|\*\*.+?\*\*|==.+?==|@@.+?@@|\*[^*\n]+?\*)")
 
 
 def rich_runs(text: str, size_pt: float, omml: dict[str, str],
@@ -356,6 +362,10 @@ def rich_runs(text: str, size_pt: float, omml: dict[str, str],
             out.append(text_run(s, size_pt, bold=True, color=C_RED,
                                 highlight="FFFF00", font=font))
             est += len(s)
+        elif part.startswith("@@") and part.endswith("@@"):
+            s = part[2:-2]                       # inline citation, same look as !ref:
+            out.append(text_run(s, size_pt, color=C_REF, italic=True, font=F_REF))
+            est += len(s) * 1.08
         elif part.startswith("*") and part.endswith("*") and len(part) > 2:
             s_ = part[1:-1]
             out.append(text_run(s_, size_pt, color=base_color, bold=base_bold,
@@ -445,6 +455,18 @@ def build_paragraphs(blocks, omml: dict[str, str], scale: float) -> tuple[str, f
             xml.append(para(pPr, runs + body))
             cpl = max(12.0, (body_w - 0.36) / (size * 0.0063))
             height += math.ceil((est + 3) / cpl) * (size * 1.30 / 72.0) + 0.06
+        elif b.kind == "ref":
+            # References keep their own size no matter how full the slide is: the
+            # auto-shrink deliberately does not touch them.
+            size = SZ_REF
+            pPr = (f'<a:pPr marL="{emu(0.42)}" indent="{emu(-0.42)}">'
+                   f'<a:spcBef><a:spcPts val="360"/></a:spcBef>'
+                   '<a:buNone/></a:pPr>')
+            body, est = rich_runs(b.text, size, omml, base_color=C_REF,
+                                  font=F_REF, italic=True)
+            xml.append(para(pPr, body))
+            cpl = max(12.0, (body_w - 0.42) / (size * 0.0076))
+            height += math.ceil(est / cpl) * (size * 1.34 / 72.0) + 0.07
         elif b.kind == "so":
             size = SZ_SO * scale
             pPr = (f'<a:pPr marL="{emu(0.36)}" indent="{emu(-0.36)}">'

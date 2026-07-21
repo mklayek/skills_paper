@@ -16,9 +16,11 @@ Blank lines are ignored. Never use plain markdown headings, tables, HTML, or fen
 | `!so: <text>` | purple handwriting "Therefore, …" line (the intuition) |
 | `!fig: <abs path> <NN%>` | figure, centred at the bottom of the slide |
 | `!note: <text>` | speaker note (one line; repeatable, lines are joined) |
+| `!ref: <entry>` | a reference entry — dark blue italic Comic Sans MS, fixed 20 pt, hanging indent |
 
 ## Inline formatting inside any text line
 - `$ … $` — inline LaTeX math (becomes a native editable PowerPoint equation).
+- `@@Author (year)@@` — an inline citation, styled like a reference (dark blue italic).
 - `**term**` — maroon bold key term.
 - `==term==` — yellow-highlighted bold red term (use ≤1 per slide, for THE key phrase).
 - Use ` — ` (em dash) freely. Do not use other markdown (no `*italic*`, no backticks, no links).
@@ -30,6 +32,17 @@ Blank lines are ignored. Never use plain markdown headings, tables, HTML, or fen
   "Eq. 12 — tightness", "The partition of unity equation".
 - Wrap the single most important word/phrase of the topic in `**…**` → renders red.
 - Keep titles ≤ 8 words after the prefix.
+
+## References and citations
+
+- Every reference goes on its own `!ref:` line. **About 5 per slide** — reference lines are
+  deliberately exempt from the auto-shrink, so a sixth or seventh will run off the slide.
+- Title reference slides `== Recap : **References** (1 of N)`.
+- In body text, wrap a citation in `@@…@@`: `@@Candès & Donoho (2004)@@ proved the rate`.
+- After the reference slides, add a short **contribution section**: one slide per role
+  (foundations, algorithm, theory, complex/directional work, learnable front ends,
+  applications), each listing point-wise what the cited work contributed and which equation
+  or claim in the deck rests on it. Group by role — never alphabetically.
 
 ## Slide budget rules
 - ≤ 6 level-0 bullets, ≤ 2 display equations, ≤ 1 figure per slide.

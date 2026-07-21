@@ -37,6 +37,7 @@ from build_styled_slides import RE_DEFN, TOKEN, parse_deck  # noqa: E402
 # Shared style constants (kept in step with build_styled_slides.py)
 # --------------------------------------------------------------------------- #
 C_RED, C_TERM, C_CHECK, C_SO = "C00000", "7B2D26", "2E7D32", "6A0DAD"
+C_REF = "1F3864"   # dark blue references / citations
 
 PREAMBLE = r"""
 \usepackage{mathpazo}
@@ -52,6 +53,7 @@ PREAMBLE = r"""
 \definecolor{mklterm}{HTML}=TERM=
 \definecolor{mklcheck}{HTML}=CHECK=
 \definecolor{mklso}{HTML}=SO=
+\definecolor{mklref}{HTML}=REF=
 \definecolor{mklrule}{HTML}=E8722C=
 
 % marker glyphs: checked box for statements, star for term/symbol definitions
@@ -62,6 +64,9 @@ PREAMBLE = r"""
 \newcommand{\mklhl}[1]{{\color{mklred}\bfseries\sethlcolor{yellow}\hl{#1}}}
 \newcommand{\mklkey}[1]{\par\medskip\textbf{#1}}
 \newcommand{\mklso}[1]{\par\smallskip{\color{mklso}\itshape #1}}
+% references / citations: dark blue italic, 20 pt (kept at size, never shrunk)
+\newcommand{\mklref}[1]{\par\smallskip\noindent\hangindent=1.4em{\color{mklref}\itshape\fontsize{11}{13}\selectfont #1}}
+\newcommand{\mklcite}[1]{{\color{mklref}\itshape #1}}
 % the equation number, printed flush right on the equation's own line
 \newcommand{\mkltag}[1]{{\color{mklred}\bfseries -{}-{}-(#1)}}
 
@@ -107,6 +112,8 @@ def inline_tex(text: str) -> str:
             out.append(r"\mklterm{" + tex_escape(part[2:-2]) + "}")
         elif part.startswith("==") and part.endswith("=="):
             out.append(r"\mklhl{" + tex_escape(part[2:-2]) + "}")
+        elif part.startswith("@@") and part.endswith("@@"):
+            out.append(r"\mklcite{" + tex_escape(part[2:-2]) + "}")
         elif part.startswith("*") and part.endswith("*") and len(part) > 2:
             out.append(r"\emph{" + tex_escape(part[1:-1]) + "}")
         else:
@@ -115,8 +122,9 @@ def inline_tex(text: str) -> str:
 
 
 def inline_md(text: str) -> str:
-    """deck inline markup -> Markdown (highlight becomes bold; maths kept)."""
-    return re.sub(r"==(.+?)==", r"**\1**", text)
+    """deck inline markup -> Markdown (highlight becomes bold; citations italic)."""
+    text = re.sub(r"==(.+?)==", r"**\1**", text)
+    return re.sub(r"@@(.+?)@@", r"*\1*", text)
 
 
 def marker_level(b) -> int:
@@ -150,6 +158,8 @@ def slide_body_tex(sl) -> str:
                              + b.text + r"$\end{center}\vspace{0.3ex}")
         elif b.kind == "key":
             lines.append(r"\mklkey{" + inline_tex(b.text) + "}")
+        elif b.kind == "ref":
+            lines.append(r"\mklref{" + inline_tex(b.text) + "}")
         elif b.kind == "so":
             lines.append(r"\mklso{" + inline_tex(b.text) + "}")
         elif b.kind == "fig" and os.path.exists(b.text):
@@ -169,6 +179,7 @@ def build_tex(slides, args) -> str:
                    .replace("=TERM=", "{" + C_TERM + "}")
                    .replace("=CHECK=", "{" + C_CHECK + "}")
                    .replace("=SO=", "{" + C_SO + "}")
+                   .replace("=REF=", "{" + C_REF + "}")
                    .replace("=E8722C=", "{E8722C}")
                    .replace("=DATE=", tex_escape(args.date))
                    .replace("=FOOT=", tex_escape(args.foot)))
@@ -213,6 +224,8 @@ def build_md(slides, args) -> str:
                 out += ["", "$$", b.text + tag, "$$", ""]
             elif b.kind == "key":
                 out += ["", f"**{inline_md(b.text)}**"]
+            elif b.kind == "ref":
+                out.append(f"- *{inline_md(b.text)}*")
             elif b.kind == "so":
                 out += ["", f"> {inline_md(b.text)}"]
             elif b.kind == "fig":
