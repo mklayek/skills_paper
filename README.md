@@ -20,6 +20,7 @@ manuscripts never get fabricated results.
 | **`research-gap`** | `research-gap` | Identify research gaps from uploaded papers/links and propose novel research projects. |
 | **`compose-plan`** | `compose-plan` | Generate structured development plans for geophysics / GPR / seismic / AI-ML projects. |
 | **`paper-reviewer`** | `review` | Analyze a paper PDF as a rigorous journal reviewer → comprehensive review report. |
+| **`ppt-mkl`** | `ppt-mkl` | Build a research presentation from a paper/methods section: one plain-text deck source renders to **PPTX** (native editable equations), **Beamer PDF**, **.tex** and **.md** in a consistent lecture style (underlined titles, checkbox/star bullets, source equation numbers, figure slides). |
 | **`doc-tools`** | `doc-readermkl`, `documentation-agent`, `md-updater`, `methods-read-doc` | Read, maintain, update, and **explain** project/research docs (.md/.txt/.pdf/.doc/.xls); `methods-read-doc` builds beginner-accessible math/methods "read" explainers (per-symbol glossaries, boxed definitions, schematics) with matching PDF/DOCX. |
 
 ---
@@ -38,6 +39,7 @@ skills_paper/
     ├── research-gap/     .claude-plugin/plugin.json + skills/research-gap/SKILL.md
     ├── compose-plan/     .claude-plugin/plugin.json + skills/compose-plan/SKILL.md
     ├── paper-reviewer/   .claude-plugin/plugin.json + skills/review/SKILL.md
+    ├── ppt-mkl/          .claude-plugin/plugin.json + skills/ppt-mkl/SKILL.md + DECK_SPEC.md + template.deck + scripts/
     └── doc-tools/        .claude-plugin/plugin.json + skills/{doc-readermkl,documentation-agent,md-updater,methods-read-doc}/SKILL.md
 ```
 
@@ -54,6 +56,7 @@ Add the marketplace once, then install whichever plugins you want:
 /plugin install research-gap@skills-paper         # research-gap analysis
 /plugin install compose-plan@skills-paper         # project planning
 /plugin install paper-reviewer@skills-paper       # journal-style paper review
+/plugin install ppt-mkl@skills-paper              # research presentations (PPTX + Beamer)
 /plugin install doc-tools@skills-paper            # doc reading / maintenance
 
 /plugin                                            # browse / manage installed plugins

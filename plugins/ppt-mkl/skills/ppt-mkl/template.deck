@@ -1,0 +1,32 @@
+# Worked example — copy this file and replace the content
+
+== CCT : The **Mother Curvelet** and generating group
+- **Mother curvelet:** a fixed, smooth, well-localized ridge-like function of finite energy on the plane.
+- The CCT is generated from a single **mother curvelet** $\gamma\in L^2(\mathbb{R}^2)$ by three geometric operations — **dilation, rotation, translation**.
+- Collect these operations into a parameter triple $(a,\theta,b)$ with
+- $a>0$ — continuous **scale** (small $a$ = fine scale, high frequency).
+- $\theta\in[0,2\pi)$ — **orientation** (rotation angle), one full turn in radians.
+- $b\in\mathbb{R}^2$ — **translation** (spatial location) vector.
+!key: One mother atom plus three operations generates the entire curvelet family.
+!so: Therefore, every curvelet in the frame is the same shape, only stretched, turned and moved.
+!note: The generating group is the set of three geometric operations — parabolic dilation, rotation, translation.
+
+== CCT : Frequency-domain construction and **admissibility**
+- For the family to tile frequency without gaps or overlaps in energy, $W$ and $V$ must satisfy **admissibility** conditions — unit total energy under the scale-invariant (Haar) measures, **expressed as below:**
+$$ \int_{0}^{\infty} W(r)^2\,\frac{dr}{r}\ =\ 1, \qquad\qquad \int_{-\infty}^{\infty} V(t)^2\,dt\ =\ 1 $$ (7)
+- $W(r)^2$ or $V(t)^2$ — energy density.
+- $t=(\theta_\xi-\theta)/\sqrt{a}$ — the scaled-angle variable.
+- Equation (7) directly yields the ==partition of unity== underlying the tight-frame property, **formulated as below:**
+$$ \sum_{\text{scales}}\ \sum_{\text{orientations}} \big|\,W(a|\xi|)\,V(\cdot)\,\big|^{2}\ =\ 1 \qquad\text{for a.e. }\xi\neq 0 $$ (8)
+- $\sum_{\text{scales}}\sum_{\text{orientations}}$ — the double sum over every ring and every wedge.
+- $|W(a|\xi|)\,V(\cdot)|^{2}$ — the squared magnitude of each ring x wedge window product.
+!key: The sum of the squared weights of all overlapping tiles is exactly 1.
+!so: Therefore, the curvelet tiles neither increase the energy by overlap nor lose information by leaving gaps.
+!note: The product of two partitions of unity (radial and angular) is itself a partition of unity, which is exactly (8).
+
+== CCT : A slide that carries a **figure**
+- A slide with a figure gets at most three statements and one equation, so the picture keeps its space.
+- Give the figure an absolute path and a width percentage; it is anchored to the bottom and grown into whatever room the text leaves.
+!key: Figures are bottom-anchored and sized automatically — never hand-place them.
+!fig: /nas/DATA1/GPRutility_simulations/B_docs/Paper/02_cganac_v2_r1_paper/docs/figs_read02/curvelet_atom_schematic.png 55%
+!note: Replace this path with the figure for your own section.
