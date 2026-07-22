@@ -149,3 +149,70 @@ auto-shrunk, so more will overflow). Cite in body text with `@@Author (year)@@`.
 reference slides with a short section stating, point-wise, what each cited work contributed
 and where it is used in the deck — grouped by role (foundations, algorithm, theory,
 applications), not listed alphabetically.
+
+## House writing rules (apply to every deck, added 2026-07-22)
+
+These project rules govern the prose inside bullets, keys, notes and captions. They sit
+on top of the deck grammar above.
+
+**Equations and cross-references**
+- Every `$$…$$` keeps its mandatory lead-in bullet ending in a plain connecting phrase and
+  a colon (`formulated as below:`, `described as:`, `given by:`, `written as:`,
+  `stated as below:`, `defined as below:`). Bold the substance phrase, never the connector.
+- Highlight the term the equation defines in a different colour — `**term**` (maroon) in the
+  lead-in or symbol bullets, or `==term==` (yellow) for the one key phrase per slide.
+- Refer to equations in body text as `Equation (11)` or `Equations (11-12)`, and to tables
+  as `Table 1`, `Table 2`. Never "Eq. 11" or "the table above".
+
+**Figures**
+- Give every `!fig:` an italic caption after the width using a pipe:
+  `!fig: /abs/f.png 60% | Figure 1. One-sentence description.`
+  The caption renders italic and centred under the image (PPTX, Beamer and Markdown), and
+  always starts with `Figure 1.`, `Figure 2.`, and so on.
+
+**Citations**
+- Use real author-year citations, wrapped in `@@…@@`: `@@(Kumar et al., 2023)@@`,
+  `@@(Terrasse et al., 2015, 2017; Kumar et al., 2023)@@`, or narrative
+  `Following @@Ge et al. (2024)@@, the operator is trained…`.
+
+**Punctuation and tone (crisp, point-wise)**
+- Replace em dashes (—) and parenthetical asides. Rephrase, or use commas, "and", "but".
+  Keep symbol definitions as short sentences: `$a>0$ is the continuous scale.`
+- Avoid semicolons in casual prose. Use periods or conjunctions. Semicolons are allowed only
+  inside multi-work citations.
+- Remove mid-sentence ellipses.
+- Use colons sparingly. The equation lead-in colon is the main sanctioned use.
+- Keep each bullet a single crisp point.
+
+**Footer**
+- Support building without the date and slide number in the footer when asked
+  (centre label only). `build_styled_slides.py` accepts `--no-date` and `--no-page`;
+  `deck_to_beamer.py` drops `=DATE=` and `\insertframenumber` under the same flags.
+
+**Bullets and indentation (added 2026-07-22)**
+- Every bullet marker is a **solid black square** (`▪`, colour `000000`) on every level,
+  in both the PPTX and the Beamer PDF. No green checkbox or red star.
+- **Body text starts flush at the left edge of the text box.** Level-0 bullets use
+  `marL=0` and no hanging indent, so the first line and every wrapped line begin at the
+  leftmost point, with no left gap and no first-line hang. Nested levels get only a small
+  left margin, still with no hanging indent.
+- The `!key` and `!so` lines are also flush-left with a black-square marker; `!key` stays
+  bold black and `!so` stays the purple "Therefore" line.
+
+**Equation slides — describe each term**
+- On a slide that carries an equation, add one short `-` bullet per symbol that says in
+  plain words what it means (for example `- $D$ is the cluttered B-scan.`). Keep each to a
+  single simple clause. This mirrors the `Symbols in (n)` glossary of the methods read-doc.
+
+**End slide — always a graphical Thank-You (added 2026-07-22)**
+- Every deck ENDS with a graphical "Thank you" slide that carries a scientific
+  line-drawing, never a bare text slide.
+- `build_styled_slides.py` and `deck_to_beamer.py` **auto-append** this slide when the deck
+  does not already end with one, using the bundled line-art
+  `assets/thankyou_lineart.png` (a clean GPR antenna-to-hyperbola motif) plus a purple
+  closing line. No deck edit is required.
+- To customise, either end the deck yourself with a slide whose title contains
+  "Thank you" and your own `!fig:` line-drawing, or replace `assets/thankyou_lineart.png`.
+  Regenerate the default motif with `scripts/make_thankyou_lineart.py <out.png>`.
+- Keep the graphic a true line drawing: black strokes, no fill, on a transparent
+  background, so it reads as a scientific schematic.

@@ -15,6 +15,14 @@ Blank lines are ignored. Never use plain markdown headings, tables, HTML, or fen
 | `!key: <text>` | bold black "takeaway" line (the one-sentence conclusion) |
 | `!so: <text>` | purple handwriting "Therefore, …" line (the intuition) |
 | `!fig: <abs path> <NN%>` | figure, centred at the bottom of the slide |
+| `!fig: <abs path> <NN%> \| Figure N. caption` | figure with an italic caption centred under it (label it `Figure 1.`, `Figure 2.`, …) |
+
+**Bullets:** every marker is a solid black square `▪` (colour `000000`) on every level.
+Body text is flush-left at the text box edge, with no left gap and no hanging indent.
+
+**End slide:** the builder always appends a graphical "Thank you" slide with a scientific
+line-drawing (`assets/thankyou_lineart.png`) unless the deck already ends with a slide whose
+title contains "Thank you".
 | `!note: <text>` | speaker note (one line; repeatable, lines are joined) |
 | `!ref: <entry>` | a reference entry — dark blue italic Comic Sans MS, fixed 20 pt, hanging indent |
 
