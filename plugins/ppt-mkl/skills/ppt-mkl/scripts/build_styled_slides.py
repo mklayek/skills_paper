@@ -783,23 +783,38 @@ def build_title_slide(prs, title: str, subtitle: str, author: str, date_s: str,
     add_footer(slide, date_s, foot, 1)
 
 
-THANKYOU_ASSET = os.path.normpath(os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "assets",
-    "thankyou_lineart.png")).replace("\\", "/")
+def _asset(name: str) -> str:
+    return os.path.normpath(os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "assets", name)
+    ).replace("\\", "/")
+
+
+# A full-bleed designed slide is preferred; the line-art content slide is the fallback.
+THANKYOU_SLIDE = _asset("thankyou_slide.png")     # full-bleed branded Thank-You image
+THANKYOU_ASSET = _asset("thankyou_lineart.png")   # fallback line-drawing
 
 
 def ensure_thankyou(slides: "list[Slide]") -> None:
-    """Every deck ends with a graphical 'Thank you' slide carrying a scientific
-    line-drawing. Appended automatically when the deck does not already end with
-    one, using the bundled line-art asset."""
+    """Every deck ends with a graphical 'Thank you' slide. When the deck does not
+    already end with one, append it: a full-bleed branded image if bundled,
+    otherwise a content slide carrying the scientific line-drawing."""
     if any("thank" in (s.title or "").lower() for s in slides):
         return
     s = Slide(title="Recap : **Thank you**")
-    if os.path.exists(THANKYOU_ASSET):
-        s.blocks.append(Block("fig", THANKYOU_ASSET, width=0.58))
-    s.blocks.append(Block("so", "Thank you for your attention. "
-                                "Questions and discussion are welcome."))
+    if os.path.exists(THANKYOU_SLIDE):
+        s.fullbleed_img = THANKYOU_SLIDE          # rendered edge-to-edge, no title/footer
+    else:
+        if os.path.exists(THANKYOU_ASSET):
+            s.blocks.append(Block("fig", THANKYOU_ASSET, width=0.58))
+        s.blocks.append(Block("so", "Thank you for your attention. "
+                                    "Questions and discussion are welcome."))
     slides.append(s)
+
+
+def build_fullbleed_slide(prs, img_path: str) -> None:
+    """A single image covering the whole slide, with no title bar or footer."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.shapes.add_picture(img_path, 0, 0, SLIDE_W, SLIDE_H)
 
 
 # --------------------------------------------------------------------------- #
@@ -839,7 +854,9 @@ def main() -> None:
         build_title_slide(prs, args.title, args.subtitle, args.author, args.date, args.foot)
         page += 1
     for sl in slides:
-        if sl.section:
+        if getattr(sl, "fullbleed_img", None):
+            build_fullbleed_slide(prs, sl.fullbleed_img)
+        elif sl.section:
             build_section_slide(prs, sl, args.date, args.foot, page)
         else:
             build_content_slide(prs, sl, omml, args.date, args.foot, page)

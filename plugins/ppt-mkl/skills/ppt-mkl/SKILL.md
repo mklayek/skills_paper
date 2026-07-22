@@ -205,14 +205,19 @@ on top of the deck grammar above.
   single simple clause. This mirrors the `Symbols in (n)` glossary of the methods read-doc.
 
 **End slide — always a graphical Thank-You (added 2026-07-22)**
-- Every deck ENDS with a graphical "Thank you" slide that carries a scientific
-  line-drawing, never a bare text slide.
+- Every deck ENDS with a graphical "Thank you" slide, never a bare text slide.
 - `build_styled_slides.py` and `deck_to_beamer.py` **auto-append** this slide when the deck
-  does not already end with one, using the bundled line-art
-  `assets/thankyou_lineart.png` (a clean GPR antenna-to-hyperbola motif) plus a purple
-  closing line. No deck edit is required.
-- To customise, either end the deck yourself with a slide whose title contains
-  "Thank you" and your own `!fig:` line-drawing, or replace `assets/thankyou_lineart.png`.
-  Regenerate the default motif with `scripts/make_thankyou_lineart.py <out.png>`.
-- Keep the graphic a true line drawing: black strokes, no fill, on a transparent
-  background, so it reads as a scientific schematic.
+  does not already end with one. No deck edit is required.
+- Two bundled assets, in priority order:
+  1. `assets/thankyou_slide.png` — a **full-bleed branded Thank-You** image (16:9),
+     placed edge-to-edge with no title bar or footer. Use this for a designed closing
+     slide with the presenter's name, full affiliation, contact, institution logo, and
+     scientific figures. This is preferred when present.
+  2. `assets/thankyou_lineart.png` — the fallback, a clean GPR antenna-to-hyperbola line
+     drawing shown on a normal content slide with a purple closing line. Regenerate it
+     with `scripts/make_thankyou_lineart.py <out.png>`.
+- To customise, drop your own 16:9 `assets/thankyou_slide.png` (recommended: name, title,
+  affiliation in local script and English, email, institution logo, on-theme figures), or
+  end the deck yourself with a slide whose title contains "Thank you".
+- The full-bleed image is baked art. Keep the affiliation text in the image correct and
+  current, since it is not editable text in the slide.

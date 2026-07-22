@@ -194,6 +194,13 @@ def build_tex(slides, args) -> str:
            r"\date{" + tex_escape(args.date) + "}",
            r"\begin{document}", r"{\setbeamertemplate{footline}{}\frame{\titlepage}}"]
     for sl in slides:
+        fb = getattr(sl, "fullbleed_img", None)
+        if fb and os.path.exists(fb):
+            out.append(r"{\setbeamertemplate{footline}{}\begin{frame}[plain]"
+                       r"\centering\makebox[\paperwidth][c]{\includegraphics"
+                       r"[width=\paperwidth,height=\paperheight,keepaspectratio]{"
+                       + fb + r"}}\end{frame}}")
+            continue
         if sl.section:
             out.append(r"\section{" + tex_escape(sl.title) + "}")
             out.append(r"\begin{frame}[plain]\vfill\centering{\Large\bfseries "
