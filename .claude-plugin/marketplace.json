@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "ai-paper",
-      "description": "Write DL/GPR/geophysics/remote-sensing papers or sections in Ge-style; preserves headings and inserts 'Yet to be developed' for unfinished work.",
+      "description": "Write DL/GPR/geophysics/remote-sensing papers or sections in Ge-style; preserves headings and inserts 'Yet to be developed' for unfinished work. Skills: `ai-paper`.",
       "source": "./plugins/ai-paper",
       "author": {
         "name": "Mrinal Kanti Layek"
@@ -17,7 +17,7 @@
     },
     {
       "name": "arch-paper",
-      "description": "Write archaeological GPR papers or sections in Goodman house style; five-tier interpretation discipline; 'Yet to be developed' for unfinished work.",
+      "description": "Write archaeological GPR papers or sections in Goodman house style; five-tier interpretation discipline; 'Yet to be developed' for unfinished work. Skills: `arch-paper`.",
       "source": "./plugins/arch-paper",
       "author": {
         "name": "Mrinal Kanti Layek"
@@ -26,7 +26,7 @@
     },
     {
       "name": "paper-reviewer",
-      "description": "Analyze academic paper PDFs from a journal reviewer's perspective and generate a comprehensive review report.",
+      "description": "Analyze academic paper PDFs from a journal reviewer's perspective and generate a comprehensive review report. Skills: `review`.",
       "source": "./plugins/paper-reviewer",
       "author": {
         "name": "Mrinal Kanti Layek"
@@ -35,7 +35,7 @@
     },
     {
       "name": "research-gap",
-      "description": "Identify research gaps from uploaded papers/links and generate novel research project proposals.",
+      "description": "Identify research gaps from uploaded papers/links and generate novel research project proposals. Skills: `research-gapmkl`.",
       "source": "./plugins/research-gap",
       "author": {
         "name": "Mrinal Kanti Layek"
@@ -44,7 +44,7 @@
     },
     {
       "name": "compose-plan",
-      "description": "Generate structured development plans for geophysics, GPR, seismic, and AI/ML scientific-computing projects.",
+      "description": "Generate structured development plans for geophysics, GPR, seismic, and AI/ML scientific-computing projects. Skills: `compose-plan`.",
       "source": "./plugins/compose-plan",
       "author": {
         "name": "Mrinal Kanti Layek"
@@ -53,7 +53,7 @@
     },
     {
       "name": "doc-tools",
-      "description": "Read, maintain, update, and explain research/project documentation (.md/.txt/.pdf/.doc/.xls): doc-reader, documentation-agent, md-updater, methods-read-doc.",
+      "description": "Read, maintain, update, and explain research/project documentation (.md/.txt/.pdf/.doc/.xls). Skills: `doc-readermkl`, `documentation-agent`, `md-updater`, `methods-read-doc`.",
       "source": "./plugins/doc-tools",
       "author": {
         "name": "Mrinal Kanti Layek"
@@ -62,7 +62,7 @@
     },
     {
       "name": "ppt-mkl",
-      "description": "Build research presentations from a paper or methods section: one deck source renders to PPTX with native editable equations, plus Beamer PDF, .tex and Markdown.",
+      "description": "Build research presentations from a paper or methods section: one deck source renders to PPTX with native editable equations, plus Beamer PDF, .tex and Markdown. Skills: `ppt-mkl`.",
       "source": "./plugins/ppt-mkl",
       "author": {
         "name": "Mrinal Kanti Layek"

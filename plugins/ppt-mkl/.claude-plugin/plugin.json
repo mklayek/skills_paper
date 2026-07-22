@@ -1,7 +1,19 @@
 {
   "name": "ppt-mkl",
-  "description": "Build research presentations from a paper or methods section: one plain-text deck source renders to PPTX with native editable equations, plus Beamer PDF, .tex and Markdown.",
+  "description": "Build research presentations from a paper or methods section: one plain-text deck source renders to PPTX with native editable equations, plus Beamer PDF, .tex and Markdown. Skills: `ppt-mkl`.",
   "version": "1.0.0",
-  "author": { "name": "Mrinal Kanti Layek", "email": "layek.mk@gmail.com" },
-  "keywords": ["presentation", "slides", "pptx", "beamer", "latex", "equations", "gpr", "deep-learning"]
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": [
+    "presentation",
+    "slides",
+    "pptx",
+    "beamer",
+    "latex",
+    "equations",
+    "gpr",
+    "deep-learning"
+  ]
 }

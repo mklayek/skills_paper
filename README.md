@@ -17,7 +17,7 @@ manuscripts never get fabricated results.
 |---|---|---|
 | **`ai-paper`** | `ai-paper` | Write DL/GPR/geophysics/remote-sensing papers or sections in Ge-style (+ paper & thesis templates). |
 | **`arch-paper`** | `arch-paper` | Write archaeological GPR (time-slice / depth-slice) papers or sections in Goodman house style, with a five-tier interpretation discipline and reusable per-section templates. |
-| **`research-gap`** | `research-gap` | Identify research gaps from uploaded papers/links and propose novel research projects. |
+| **`research-gap`** | `research-gapmkl` | Identify research gaps from uploaded papers/links and propose novel research projects. |
 | **`compose-plan`** | `compose-plan` | Generate structured development plans for geophysics / GPR / seismic / AI-ML projects. |
 | **`paper-reviewer`** | `review` | Analyze a paper PDF as a rigorous journal reviewer → comprehensive review report. |
 | **`ppt-mkl`** | `ppt-mkl` | Build a research presentation from a paper/methods section: one plain-text deck source renders to **PPTX** (native editable equations), **Beamer PDF**, **.tex** and **.md** in a consistent lecture style (underlined titles, checkbox/star bullets, source equation numbers, figure slides). |
