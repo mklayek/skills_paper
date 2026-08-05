@@ -1,0 +1,3 @@
+Drop the institution logo at the report's figs/logo_cnu.png (or figs/logo.png).
+The title page references figs/logo_cnu.png at width 150 px. If absent, the
+title page still renders; the logo line is simply omitted.

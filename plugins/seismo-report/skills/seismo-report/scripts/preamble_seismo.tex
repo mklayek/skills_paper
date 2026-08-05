@@ -1,0 +1,18 @@
+% seismo-report xelatex header include (use with --pdf-engine=xelatex)
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\newfontfamily\koreanfont{Malgun Gothic}
+\usepackage{xeCJK}
+\setCJKmainfont{Malgun Gothic}
+\usepackage{setspace}
+\setstretch{1.15}
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\bfseries\fontsize{16}{19}\selectfont}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\bfseries\fontsize{14}{17}\selectfont}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalfont\bfseries\fontsize{13}{16}\selectfont}{\thesubsubsection}{1em}{}
+\titleformat{\paragraph}[hang]{\normalfont\fontsize{12}{15}\selectfont}{\theparagraph}{1em}{}
+\titleformat{\subparagraph}[hang]{\normalfont\itshape\fontsize{12}{15}\selectfont}{\thesubparagraph}{1em}{}
+\setlength{\parindent}{0.5in}
+\usepackage{graphicx}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}

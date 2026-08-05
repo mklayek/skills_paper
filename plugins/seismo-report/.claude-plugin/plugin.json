@@ -1,0 +1,21 @@
+{
+  "name": "seismo-report",
+  "description": "Turn seismological inputs (figures, MD, PDF, CSV/XLSX, published papers) into a chapter-wise, publication-quality interpretation report with a formal title page and MD/HTML/LaTeX-PDF/DOCX output. Detects the study type (event analysis, hazard, waveform, source parameters, ground-motion simulation, FWI, ambient noise, GPR-seismic comparison), builds the full chapter set, and enforces Times New Roman 12pt / 1.15 spacing / first-line indent / justified with a styled heading hierarchy. Honest 'Yet to be developed' policy. Skills: `seismo-report`.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": [
+    "report-writing",
+    "seismology",
+    "fwi",
+    "ground-motion",
+    "waveform",
+    "fourier-amplitude-spectra",
+    "response-spectra",
+    "docx",
+    "latex",
+    "templates"
+  ]
+}

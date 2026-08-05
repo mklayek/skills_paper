@@ -1,8 +1,8 @@
 # skills_paper — Detailed Skills Report
 
-A complete walkthrough of every plugin, skill, and sub-skill in the **`skills-paper`** Claude Code marketplace (`github.com/mklayek/skills_paper`). The marketplace covers the full research-paper lifecycle for deep-learning, GPR, geophysics, and remote-sensing work:
+A complete walkthrough of every plugin, skill, and sub-skill in the **`skills-paper`** Claude Code marketplace (`github.com/mklayek/skills_paper`). The marketplace covers the full research-paper lifecycle for deep-learning, GPR, geophysics, seismology, and remote-sensing work:
 
-> **plan → find gaps → write → review → present → document.**
+> **plan → find gaps → write → review → present → document → report.**
 
 All writing skills follow the IEEE-TGRS house style of **Ge et al. (2024) ("Wavelet-GAN")**, enforce strict global rules (US English, tense, equations, figures, citations), and use an honest **"Yet to be developed"** policy so partial manuscripts never get fabricated results.
 
@@ -19,7 +19,8 @@ All writing skills follow the IEEE-TGRS house style of **Ge et al. (2024) ("Wave
 7. [paper-reviewer](#7-paper-reviewer) — journal-style paper review
 8. [ppt-mkl](#8-ppt-mkl) — presentations (PPTX + Beamer + MD)
 9. [doc-tools](#9-doc-tools) — read, maintain, and explain documentation
-10. [Cross-cutting writing rules](#10-cross-cutting-writing-rules)
+10. [seismo-report](#10-seismo-report) — seismological interpretation reports (MD/HTML/PDF/DOCX)
+11. [Cross-cutting writing rules](#11-cross-cutting-writing-rules)
 
 ---
 
@@ -29,6 +30,7 @@ All writing skills follow the IEEE-TGRS house style of **Ge et al. (2024) ("Wave
 |---|---|---|---|
 | **`ai-paper`** | `ai-paper` | writing | Write DL/GPR/geophysics/remote-sensing papers or single sections in Ge-style, with bundled paper and thesis templates. |
 | **`arch-paper`** | `arch-paper` | writing | Write archaeological GPR (time-slice / depth-slice) papers in Goodman house style, with a five-tier interpretation discipline and per-section templates. |
+| **`seismo-report`** | `seismo-report` | writing | Turn seismological data into a chapter-wise, publication-quality interpretation report with a formal title page and MD/HTML/LaTeX-PDF/DOCX output; detects the study type (event, waveform/FAS, source parameters, ground-motion, FWI, ambient noise) and builds the full chapter set. |
 | **`research-gap`** | `research-gap` | research | Identify research gaps from uploaded papers or links and propose novel research projects. |
 | **`compose-plan`** | `compose-plan` | planning | Generate a structured development plan (architecture + TODO) before any code is written. |
 | **`paper-reviewer`** | `review` | review | Analyze a paper PDF as a rigorous journal reviewer and produce a comprehensive review report. |
@@ -306,7 +308,36 @@ Install `doc-tools@skills-paper`. Ask to read or summarize a document (`doc-read
 
 ---
 
-## 10. Cross-cutting writing rules
+## 10. seismo-report
+
+**Plugin:** `seismo-report` · **Skill:** `seismo-report` · **Category:** writing
+
+Modeled on `arch-paper`, but for **seismology**. It turns whatever inputs exist — figures (waveforms, spectrograms, Fourier amplitude spectra, response spectra, focal mechanisms, station maps, time histories, FWI model panels), Markdown notes, PDFs, CSV/XLSX tables, and published papers — into a comprehensive, chapter-wise interpretation report. The guiding principle is interpretation over description: it reads the data for what it implies about the source, path, and site, and reasons toward a conclusion.
+
+**Report-type detection.** The skill first classifies the study (earthquake event analysis, seismic hazard, waveform analysis, source-parameter estimation, ground-motion simulation, **FWI results**, ambient-noise analysis, or GPR-seismic comparison) via `templates/report_type_classifier.md`, then builds the chapter set that fits.
+
+**Chapters.** The full ordered set (`templates/MASTER_REPORT_TEMPLATE.md`): Title Page, Index, Executive Summary, Table of Contents, Introduction, Objectives, Background, Study Area, Dataset Description, Instrumentation, Methodology, Mathematical Background, Data Processing Workflow, Results, Figures and Tables, Interpretation, Discussion, Validation, Comparison with Published Studies, Conclusions, Limitations, Future Work, References, Appendices, Glossary, Abbreviations. Any chapter without supporting input keeps its heading and reads **`Yet to be developed`**. Every abbreviation and symbol is defined on first use, and per-input interpretation recipes live in `templates/per_analysis_protocols.md`.
+
+**Title page.** A formal, centered title page with an auto-generated title, the date, optional project info and document version, and a fixed author block (Dr. Mrinal Kanti Layek, Geophysics & AI Lab, Chonnam National University — with the Korean affiliation line), from `templates/title_page.md`.
+
+**Formatting.** DOCX and PDF render in **Times New Roman 12 pt, 1.15 line spacing, first-line indent, justified**, with a styled heading hierarchy (section bold 16 pt → sub-section 14 pt → sub-sub-section 13 pt → paragraph 12 pt regular → sub-paragraph 12 pt italic) and Korean-aware fonts (Malgun Gothic on DOCX via the East-Asian font, xeCJK on PDF). Headings are authored as ATX Markdown so pandoc maps them to real Word/LaTeX heading styles with automatic section numbering and a table of contents. The single source of truth is `templates/formatting_spec.md`, implemented by `scripts/make_reference_docx.py` (the DOCX style reference), `scripts/preamble_seismo.tex` (xelatex), and `scripts/seismo.css` (HTML).
+
+**Build order.** `scripts/build_report.py` produces outputs in a fixed order: Markdown master → HTML → figures → **user approval** → LaTeX → PDF → optional DOCX and PPTX (PDF/DOCX are gated behind explicit flags so nothing renders before approval). Writing style follows `reference/AI_humanization_writing_instructions.md` (US English, no em dashes, first-line indent, varied openers, equations in `$…$`, real author-date citations). There is **no page limit**.
+
+**How to run (Windows / PowerShell):**
+
+```powershell
+& "$env:USERPROFILE\.conda\envs\seismo\python.exe" `
+    <skill>\scripts\build_report.py REPORT.md --html            # HTML (safe, pre-approval)
+& "$env:USERPROFILE\.conda\envs\seismo\python.exe" `
+    <skill>\scripts\build_report.py REPORT.md --pdf --docx      # after approval
+```
+
+Dependencies: pandoc, python-docx, and a xelatex engine (MiKTeX/TeX Live). A worked example lives in `examples/example_fwi_report/`, and the whole specification is duplicated in `seismo-report.md` for standalone use.
+
+---
+
+## 11. Cross-cutting writing rules
 
 Enforced by `ai-paper` and shared across the writing and doc skills. The full human-voice rule-set is in **`AI_humanization_writing_instructions.md`** at the repo root.
 

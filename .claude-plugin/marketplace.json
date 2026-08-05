@@ -25,6 +25,15 @@
       "category": "writing"
     },
     {
+      "name": "seismo-report",
+      "description": "Turn seismological data (event analysis, waveforms, FAS / response spectra, source parameters, ground-motion simulation, FWI, ambient noise, GPR-seismic comparison) into a chapter-wise, publication-quality interpretation report with a formal title page and MD/HTML/LaTeX-PDF/DOCX output (Times New Roman 12pt, 1.15 spacing, styled heading hierarchy); 'Yet to be developed' for unfinished work. Skills: `seismo-report`.",
+      "source": "./plugins/seismo-report",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "writing"
+    },
+    {
       "name": "paper-reviewer",
       "description": "Analyze academic paper PDFs from a journal reviewer's perspective and generate a comprehensive review report. Skills: `review`.",
       "source": "./plugins/paper-reviewer",
