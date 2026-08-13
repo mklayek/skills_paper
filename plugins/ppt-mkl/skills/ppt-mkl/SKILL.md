@@ -7,15 +7,8 @@ description: Use when asked to build a research presentation, slide deck, PPTX, 
 
 ## Overview
 
-One plain-text source (`.deck`) renders to **four** artefacts:
+One plain-text source (`.deck`) renders to **four** artefacts that all look the same:
 **PPTX** (native editable equations), **Beamer PDF**, **.tex**, and **.md**.
-
-The PPTX carries the MKL lecture chrome (underlined title over a grey+orange rule).
-The Beamer back-end uses the **[Madrid](https://deic.uab.cat/~iblanes/beamer_gallery/individual/Madrid-default-default.html)**
-theme by default — `Madrid-default-default`: blue frametitle bar, infolines headline,
-and Madrid's footline reading *short author | foot label | date + page*. Content
-styling (checkboxes, stars, maroon terms, red `---(N)` tags, references, "Therefore…")
-is identical in both.
 
 **Core principle: never hand-build slides with python-pptx and never fake maths with
 Unicode.** Equations must be native Office-Math (OMML) so they stay editable and print
@@ -114,18 +107,25 @@ Chonnam National University, Gwangju, Republic of Korea [61186]
 지구물리 및 인공지능 연구실, 에너지자원공학과, 전남대학교, 광주광역시, 대한민국 [61186]
 ```
 
-The `$A` one-liner above is the title-slide form of this block and is the default
-baked into `deck_to_beamer.py` (`DEFAULT_AUTHOR`) — omit `--author` and you get it.
-Madrid's footline uses the short form `M. K. Layek — CNU` (`--author-short`).
-Use the Korean lines when a Korean-language or bilingual deck is requested.
+The `$A` one-liner above is the title-slide form of this block and is the default baked
+into `deck_to_beamer.py` (`DEFAULT_AUTHOR`) — omit `--author` and you get it. Madrid's
+footline uses the short form `M. K. Layek — CNU` (`--author-short`). Use the Korean lines
+when a Korean-language or bilingual deck is requested.
 
 ### Beamer theme flags
+
+The Beamer back-end builds on the
+**[Madrid](https://deic.uab.cat/~iblanes/beamer_gallery/individual/Madrid-default-default.html)**
+theme by default (`Madrid-default-default`): blue frametitle bar, infolines headline, and
+Madrid's own footline of *short author | foot label | date + page*.
 
 | Flag | Default | Effect |
 |---|---|---|
 | `--beamer-theme` | `Madrid` | any beamer theme name; `none` = the old hand-built chrome |
 | `--beamer-colortheme` | `default` | beamer color theme |
 | `--author-short` | `M. K. Layek — CNU` | left cell of Madrid's footline |
+
+The PPTX back-end is unaffected — it keeps the underlined-title lecture style.
 
 **Output conventions**
 - Name every artefact `YYYYMMDD_HHMMSS_<topic>_slides` — one stem, five extensions.
@@ -184,3 +184,75 @@ auto-shrunk, so more will overflow). Cite in body text with `@@Author (year)@@`.
 reference slides with a short section stating, point-wise, what each cited work contributed
 and where it is used in the deck — grouped by role (foundations, algorithm, theory,
 applications), not listed alphabetically.
+
+## House writing rules (apply to every deck, added 2026-07-22)
+
+These project rules govern the prose inside bullets, keys, notes and captions. They sit
+on top of the deck grammar above.
+
+**Equations and cross-references**
+- Every `$$…$$` keeps its mandatory lead-in bullet ending in a plain connecting phrase and
+  a colon (`formulated as below:`, `described as:`, `given by:`, `written as:`,
+  `stated as below:`, `defined as below:`). Bold the substance phrase, never the connector.
+- Highlight the term the equation defines in a different colour — `**term**` (maroon) in the
+  lead-in or symbol bullets, or `==term==` (yellow) for the one key phrase per slide.
+- Refer to equations in body text as `Equation (11)` or `Equations (11-12)`, and to tables
+  as `Table 1`, `Table 2`. Never "Eq. 11" or "the table above".
+
+**Figures**
+- Give every `!fig:` an italic caption after the width using a pipe:
+  `!fig: /abs/f.png 60% | Figure 1. One-sentence description.`
+  The caption renders italic and centred under the image (PPTX, Beamer and Markdown), and
+  always starts with `Figure 1.`, `Figure 2.`, and so on.
+
+**Citations**
+- Use real author-year citations, wrapped in `@@…@@`: `@@(Kumar et al., 2023)@@`,
+  `@@(Terrasse et al., 2015, 2017; Kumar et al., 2023)@@`, or narrative
+  `Following @@Ge et al. (2024)@@, the operator is trained…`.
+
+**Punctuation and tone (crisp, point-wise)**
+- Replace em dashes (—) and parenthetical asides. Rephrase, or use commas, "and", "but".
+  Keep symbol definitions as short sentences: `$a>0$ is the continuous scale.`
+- Avoid semicolons in casual prose. Use periods or conjunctions. Semicolons are allowed only
+  inside multi-work citations.
+- Remove mid-sentence ellipses.
+- Use colons sparingly. The equation lead-in colon is the main sanctioned use.
+- Keep each bullet a single crisp point.
+
+**Footer**
+- Support building without the date and slide number in the footer when asked
+  (centre label only). `build_styled_slides.py` accepts `--no-date` and `--no-page`;
+  `deck_to_beamer.py` drops `=DATE=` and `\insertframenumber` under the same flags.
+
+**Bullets and indentation (added 2026-07-22)**
+- Every bullet marker is a **solid black square** (`▪`, colour `000000`) on every level,
+  in both the PPTX and the Beamer PDF. No green checkbox or red star.
+- **Body text starts flush at the left edge of the text box.** Level-0 bullets use
+  `marL=0` and no hanging indent, so the first line and every wrapped line begin at the
+  leftmost point, with no left gap and no first-line hang. Nested levels get only a small
+  left margin, still with no hanging indent.
+- The `!key` and `!so` lines are also flush-left with a black-square marker; `!key` stays
+  bold black and `!so` stays the purple "Therefore" line.
+
+**Equation slides — describe each term**
+- On a slide that carries an equation, add one short `-` bullet per symbol that says in
+  plain words what it means (for example `- $D$ is the cluttered B-scan.`). Keep each to a
+  single simple clause. This mirrors the `Symbols in (n)` glossary of the methods read-doc.
+
+**End slide — always a graphical Thank-You (added 2026-07-22)**
+- Every deck ENDS with a graphical "Thank you" slide, never a bare text slide.
+- `build_styled_slides.py` and `deck_to_beamer.py` **auto-append** this slide when the deck
+  does not already end with one. No deck edit is required.
+- Two bundled assets, in priority order:
+  1. `assets/thankyou_slide.png` — a **full-bleed branded Thank-You** image (16:9),
+     placed edge-to-edge with no title bar or footer. Use this for a designed closing
+     slide with the presenter's name, full affiliation, contact, institution logo, and
+     scientific figures. This is preferred when present.
+  2. `assets/thankyou_lineart.png` — the fallback, a clean GPR antenna-to-hyperbola line
+     drawing shown on a normal content slide with a purple closing line. Regenerate it
+     with `scripts/make_thankyou_lineart.py <out.png>`.
+- To customise, drop your own 16:9 `assets/thankyou_slide.png` (recommended: name, title,
+  affiliation in local script and English, email, institution logo, on-theme figures), or
+  end the deck yourself with a slide whose title contains "Thank you".
+- The full-bleed image is baked art. Keep the affiliation text in the image correct and
+  current, since it is not editable text in the slide.

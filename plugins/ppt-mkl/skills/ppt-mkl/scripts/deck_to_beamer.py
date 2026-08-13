@@ -5,17 +5,17 @@ Companion to build_styled_slides.py (which renders the same .deck to a styled PP
 One source, four artefacts: .deck -> .md + .tex + .pdf (+ .pptx from the other tool),
 all carrying the same lecture style:
 
-  * green checkbox items, red star items for symbol/term definitions;
+  * black-square bullets at every level, flush-left body text;
   * display equations keeping the SOURCE's own numbers, printed as a red ---(N);
   * a bold takeaway line and a purple handwriting "Therefore, ..." line;
-  * bottom figure and speaker notes.
+  * bottom figure with an italic caption, and a graphical Thank-You end slide.
 
 The Beamer back-end uses the **Madrid** theme by default (Madrid-default-default,
 https://deic.uab.cat/~iblanes/beamer_gallery/individual/Madrid-default-default.html):
-an infolines headline carrying the section name, and Madrid's own footline reading
-short author | foot label | date + page. Pass --beamer-theme none to restore the
-older hand-built chrome (underlined title over a grey+orange rule, plain footline).
-The PPTX back-end is unaffected — it keeps the underlined-title lecture style.
+a blue frametitle bar, an infolines headline carrying the section name, and Madrid's
+own footline reading short author | foot label | date + page. Pass --beamer-theme none
+to restore the hand-built chrome (underlined title over a grey+orange rule, plain
+footline). The PPTX back-end is unaffected and keeps the underlined-title style.
 
 Compiles with pdflatex only (never lualatex/xelatex — they render blank on this box).
 
@@ -39,7 +39,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_styled_slides import RE_DEFN, TOKEN, parse_deck  # noqa: E402
+from build_styled_slides import RE_DEFN, TOKEN, parse_deck, ensure_thankyou  # noqa: E402
 
 # --------------------------------------------------------------------------- #
 # Shared style constants (kept in step with build_styled_slides.py)
@@ -78,10 +78,11 @@ PREAMBLE = r"""
 \definecolor{mklref}{HTML}=REF=
 \definecolor{mklrule}{HTML}=E8722C=
 
-% marker glyphs: checked box for statements, star for term/symbol definitions
-\newcommand{\mklcheckbox}{{\color{mklcheck}\ding{51}\kern-0.92em$\square$}}
-\newcommand{\mklstar}{{\color{mklred}\ding{72}}}
-\newcommand{\mkldot}{{\color{mklred}\ding{110}}}
+% marker glyphs: a solid black square is the bullet on every level
+\newcommand{\mklsquare}{{\color{black}\ding{110}}}
+\newcommand{\mklcheckbox}{\mklsquare}
+\newcommand{\mklstar}{\mklsquare}
+\newcommand{\mkldot}{\mklsquare}
 \newcommand{\mklterm}[1]{{\color{mklterm}\bfseries #1}}
 \newcommand{\mklhl}[1]{{\color{mklred}\bfseries\sethlcolor{yellow}\hl{#1}}}
 \newcommand{\mklkey}[1]{\par\medskip\textbf{#1}}
@@ -109,8 +110,7 @@ PREAMBLE_PLAIN_CHROME = r"""
 \setbeamertemplate{footline}{%
   \leavevmode\hbox{\begin{beamercolorbox}[wd=\paperwidth,ht=2.6ex,dp=1.3ex,%
     leftskip=1.2em,rightskip=1.2em]{palette quaternary}%
-    {\footnotesize\color{gray}=DATE=\hfill =FOOT=\hfill
-     \insertframenumber}%
+    {\footnotesize\color{gray}=DATE=\hfill =FOOT=\hfill =PAGE=}%
   \end{beamercolorbox}}}
 \makeatother
 """
@@ -165,12 +165,13 @@ def marker_level(b) -> int:
 # --------------------------------------------------------------------------- #
 def slide_body_tex(sl) -> str:
     lines, item_open = [], False
-    MARK = {0: r"\mklcheckbox", 1: r"\mklstar", 2: r"\mkldot"}
+    MARK = {0: r"\mklsquare", 1: r"\mklsquare", 2: r"\mklsquare"}
     IND = {0: "0pt", 1: "14pt", 2: "26pt"}
     for b in sl.blocks:
         if b.kind == "bullet":
             lv = marker_level(b)
-            lines.append(rf"\par\smallskip\noindent\hangindent=1.6em\hspace*{{{IND[lv]}}}"
+            # flush left, no hanging indent (wrapped lines align at the left margin)
+            lines.append(rf"\par\smallskip\noindent\hangindent=0pt\hspace*{{{IND[lv]}}}"
                          rf"{MARK[lv]}~{inline_tex(b.text)}")
             item_open = True
         elif b.kind == "eq":
@@ -191,9 +192,10 @@ def slide_body_tex(sl) -> str:
         elif b.kind == "so":
             lines.append(r"\mklso{" + inline_tex(b.text) + "}")
         elif b.kind == "fig" and os.path.exists(b.text):
+            cap = (r"\\[0.2ex]{\footnotesize\itshape %s}" % tex_escape(b.tag)) if b.tag else ""
             lines.append(r"\begin{center}\includegraphics[width=%.2f\textwidth,"
-                         r"height=0.42\textheight,keepaspectratio]{%s}\end{center}"
-                         % (min(b.width, 0.95), b.text))
+                         r"height=0.42\textheight,keepaspectratio]{%s}%s\end{center}"
+                         % (min(b.width, 0.95), b.text, cap))
     del item_open
     return "\n".join(lines)
 
@@ -214,7 +216,8 @@ def build_tex(slides, args) -> str:
                    .replace("=SO=", "{" + C_SO + "}")
                    .replace("=REF=", "{" + C_REF + "}")
                    .replace("=E8722C=", "{E8722C}")
-                   .replace("=DATE=", tex_escape(args.date))
+                   .replace("=DATE=", "" if args.no_date else tex_escape(args.date))
+                   .replace("=PAGE=", "" if args.no_page else r"\insertframenumber")
                    .replace("=FOOT=", tex_escape(args.foot)))
     use = (r"\usetheme{default}\usecolortheme{default}" if plain
            else rf"\usetheme{{{theme}}}\usecolortheme{{{ctheme}}}\usefonttheme{{default}}")
@@ -222,14 +225,22 @@ def build_tex(slides, args) -> str:
     # Short forms drive a named theme's footline: author | foot label | date + page.
     a_short = tex_escape(getattr(args, "author_short", "") or DEFAULT_AUTHOR_SHORT)
     t_short = tex_escape(args.foot or args.title)
+    d_short = "" if args.no_date else tex_escape(args.date)
 
     out = [r"\documentclass[aspectratio=169,10pt]{beamer}", use, pre,
            r"\title[" + t_short + "]{" + tex_escape(args.title) + "}",
            r"\subtitle{" + tex_escape(args.subtitle) + "}",
            r"\author[" + a_short + "]{" + tex_escape(args.author) + "}",
-           r"\date[" + tex_escape(args.date) + "]{" + tex_escape(args.date) + "}",
+           r"\date[" + d_short + "]{" + tex_escape(args.date) + "}",
            r"\begin{document}", r"{\setbeamertemplate{footline}{}\frame{\titlepage}}"]
     for sl in slides:
+        fb = getattr(sl, "fullbleed_img", None)
+        if fb and os.path.exists(fb):
+            out.append(r"{\setbeamertemplate{footline}{}\begin{frame}[plain]"
+                       r"\centering\makebox[\paperwidth][c]{\includegraphics"
+                       r"[width=\paperwidth,height=\paperheight,keepaspectratio]{"
+                       + fb + r"}}\end{frame}}")
+            continue
         if sl.section:
             out.append(r"\section{" + tex_escape(sl.title) + "}")
             out.append(r"\begin{frame}[plain]\vfill\centering{\Large\bfseries "
@@ -269,6 +280,8 @@ def build_md(slides, args) -> str:
                 out += ["", f"> {inline_md(b.text)}"]
             elif b.kind == "fig":
                 out += ["", f"![]({b.text}){{width={int(b.width * 100)}%}}", ""]
+                if b.tag:
+                    out += [f"*{b.tag}*", ""]
         if sl.notes:
             out += ["", f"*Note: {' '.join(sl.notes)}*"]
         out += ["", "---", ""]
@@ -292,6 +305,8 @@ def main() -> None:
                     help="beamer theme (default: Madrid; 'none' = hand-built chrome)")
     ap.add_argument("--beamer-colortheme", default=DEFAULT_COLORTHEME,
                     help="beamer color theme (default: default)")
+    ap.add_argument("--no-date", action="store_true", help="omit the date from the footline")
+    ap.add_argument("--no-page", action="store_true", help="omit the frame number from the footline")
     ap.add_argument("--md-only", action="store_true")
     args = ap.parse_args()
 
@@ -301,6 +316,7 @@ def main() -> None:
     os.makedirs(out_dir, exist_ok=True)
 
     slides = parse_deck(src)
+    ensure_thankyou(slides)
     print(f"deck_to_beamer: {src}\n  slides: {len(slides)}")
 
     md_path = os.path.join(out_dir, name + ".md")

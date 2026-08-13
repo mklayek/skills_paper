@@ -1,7 +1,16 @@
 {
   "name": "ai-paper",
-  "description": "Write deep-learning / GPR / geophysics / remote-sensing papers (or any section) in Ge-style with reusable templates and an honest 'Yet to be developed' policy.",
+  "description": "Write deep-learning / GPR / geophysics / remote-sensing papers (or any section) in Ge-style with reusable templates and an honest 'Yet to be developed' policy. Skills: `ai-paper`.",
   "version": "1.0.0",
-  "author": { "name": "Mrinal Kanti Layek", "email": "layek.mk@gmail.com" },
-  "keywords": ["paper-writing", "scientific-writing", "templates", "gpr", "deep-learning"]
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": [
+    "paper-writing",
+    "scientific-writing",
+    "templates",
+    "gpr",
+    "deep-learning"
+  ]
 }

@@ -1,49 +1,82 @@
 {
   "name": "skills-paper",
   "description": "Research-paper lifecycle skills for GeoAI / deep-learning / GPR projects: plan, find gaps, write (Ge-style), review, and maintain docs.",
-  "owner": { "name": "mklayek", "email": "layek.mk@gmail.com" },
+  "owner": {
+    "name": "mklayek",
+    "email": "layek.mk@gmail.com"
+  },
   "plugins": [
     {
       "name": "ai-paper",
-      "description": "Write DL/GPR/geophysics/remote-sensing papers or sections in Ge-style; preserves headings and inserts 'Yet to be developed' for unfinished work.",
+      "description": "Write DL/GPR/geophysics/remote-sensing papers or sections in Ge-style; preserves headings and inserts 'Yet to be developed' for unfinished work. Skills: `ai-paper`.",
       "source": "./plugins/ai-paper",
-      "author": { "name": "Mrinal Kanti Layek" },
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "writing"
+    },
+    {
+      "name": "arch-paper",
+      "description": "Write archaeological GPR papers or sections in Goodman house style; five-tier interpretation discipline; 'Yet to be developed' for unfinished work. Skills: `arch-paper`.",
+      "source": "./plugins/arch-paper",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "writing"
+    },
+    {
+      "name": "seismo-report",
+      "description": "Turn seismological data (event analysis, waveforms, FAS / response spectra, source parameters, ground-motion simulation, FWI, ambient noise, GPR-seismic comparison) into a chapter-wise, publication-quality interpretation report with a formal title page and MD/HTML/LaTeX-PDF/DOCX output (Times New Roman 12pt, 1.15 spacing, styled heading hierarchy); 'Yet to be developed' for unfinished work. Skills: `seismo-report`.",
+      "source": "./plugins/seismo-report",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
       "category": "writing"
     },
     {
       "name": "paper-reviewer",
-      "description": "Analyze academic paper PDFs from a journal reviewer's perspective and generate a comprehensive review report.",
+      "description": "Analyze academic paper PDFs from a journal reviewer's perspective and generate a comprehensive review report. Skills: `review`.",
       "source": "./plugins/paper-reviewer",
-      "author": { "name": "Mrinal Kanti Layek" },
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
       "category": "review"
     },
     {
       "name": "research-gap",
-      "description": "Identify research gaps from uploaded papers/links and generate novel research project proposals.",
+      "description": "Identify research gaps from uploaded papers/links and generate novel research project proposals. Skills: `research-gapmkl`.",
       "source": "./plugins/research-gap",
-      "author": { "name": "Mrinal Kanti Layek" },
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
       "category": "research"
     },
     {
       "name": "compose-plan",
-      "description": "Generate structured development plans for geophysics, GPR, seismic, and AI/ML scientific-computing projects.",
+      "description": "Generate structured development plans for geophysics, GPR, seismic, and AI/ML scientific-computing projects. Skills: `compose-plan`.",
       "source": "./plugins/compose-plan",
-      "author": { "name": "Mrinal Kanti Layek" },
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
       "category": "planning"
     },
     {
-      "name": "ppt-mkl",
-      "description": "Research presentations from one .deck source: PPTX with native editable equations, plus Beamer PDF/.tex/.md on the Madrid theme.",
-      "source": "./plugins/ppt-mkl",
-      "author": { "name": "Mrinal Kanti Layek" },
-      "category": "presentation"
+      "name": "doc-tools",
+      "description": "Read, maintain, update, and explain research/project documentation (.md/.txt/.pdf/.doc/.xls). Skills: `doc-readermkl`, `documentation-agent`, `md-updater`, `methods-read-doc`.",
+      "source": "./plugins/doc-tools",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "documentation"
     },
     {
-      "name": "doc-tools",
-      "description": "Read, maintain, and update research/project documentation (.md/.txt/.pdf/.doc/.xls): doc-reader, documentation-agent, md-updater.",
-      "source": "./plugins/doc-tools",
-      "author": { "name": "Mrinal Kanti Layek" },
-      "category": "documentation"
+      "name": "ppt-mkl",
+      "description": "Build research presentations from a paper or methods section: one deck source renders to PPTX with native editable equations, plus Beamer PDF, .tex and Markdown. Skills: `ppt-mkl`.",
+      "source": "./plugins/ppt-mkl",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "presentation"
     }
   ]
 }

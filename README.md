@@ -1,9 +1,12 @@
 # skills_paper — Research-Paper Lifecycle Skills (Claude Code marketplace)
 
 A **Claude Code plugin marketplace** (`skills-paper`) of skills covering the research-paper lifecycle for
-**deep-learning / GPR / geophysics / remote-sensing** projects:
+**deep-learning / GPR / geophysics / seismology / remote-sensing** projects:
 
-> **plan → find gaps → write → review → document.**
+> **plan → find gaps → write → review → document → report.**
+
+It also ships **technical-report** generators — `seismo-report` turns seismological data straight into a
+chapter-wise, publication-quality interpretation report (MD/HTML/PDF/DOCX).
 
 Writing follows the **IEEE-TGRS style of Ge et al. (2024) ("Wavelet-GAN")**, with strict global rules (US
 English, tense, equations, figures, citations) and an honest **"Yet to be developed"** policy so partial
@@ -16,11 +19,13 @@ manuscripts never get fabricated results.
 | Plugin | Skill(s) | What it does |
 |---|---|---|
 | **`ai-paper`** | `ai-paper` | Write DL/GPR/geophysics/remote-sensing papers or sections in Ge-style (+ paper & thesis templates). |
-| **`research-gap`** | `research-gap` | Identify research gaps from uploaded papers/links and propose novel research projects. |
+| **`arch-paper`** | `arch-paper` | Write archaeological GPR (time-slice / depth-slice) papers or sections in Goodman house style, with a five-tier interpretation discipline and reusable per-section templates. |
+| **`seismo-report`** | `seismo-report` | Turn seismological inputs (figures, MD, PDF, CSV/XLSX, papers) into a chapter-wise, publication-quality **interpretation report** — detects the study type (event analysis, waveform/FAS/response-spectra, source parameters, ground-motion simulation, **FWI**, ambient noise, GPR-seismic comparison), builds the full chapter set, and renders **MD → HTML → LaTeX-PDF → DOCX** with a formal title page (Times New Roman 12 pt, 1.15 spacing, first-line indent, justified, styled heading hierarchy; Korean-aware). |
+| **`research-gap`** | `research-gapmkl` | Identify research gaps from uploaded papers/links and propose novel research projects. |
 | **`compose-plan`** | `compose-plan` | Generate structured development plans for geophysics / GPR / seismic / AI-ML projects. |
 | **`paper-reviewer`** | `review` | Analyze a paper PDF as a rigorous journal reviewer → comprehensive review report. |
-| **`ppt-mkl`** | `ppt-mkl` | Research decks from one `.deck` source → PPTX (native editable equations) + Beamer PDF/`.tex`/`.md` on the **Madrid** theme. |
-| **`doc-tools`** | `doc-readermkl`, `documentation-agent`, `md-updater` | Read, maintain, and update project/research docs (.md/.txt/.pdf/.doc/.xls). |
+| **`ppt-mkl`** | `ppt-mkl` | Build a research presentation from a paper/methods section: one plain-text deck source renders to **PPTX** (native editable equations), **Beamer PDF**, **.tex** and **.md** in a consistent lecture style (underlined titles, checkbox/star bullets, source equation numbers, figure slides). |
+| **`doc-tools`** | `doc-readermkl`, `documentation-agent`, `md-updater`, `methods-read-doc` | Read, maintain, update, and **explain** project/research docs (.md/.txt/.pdf/.doc/.xls); `methods-read-doc` builds beginner-accessible math/methods "read" explainers — per-symbol glossaries, boxed definitions, TikZ schematics **and ray/physics diagrams** (e.g. GPR acquisition geometry → hyperbola → polarity), plus full self-contained **`Fig. N.`** captions (hanging-indent, 3 pt below body, one preamble macro) — with matching PDF/DOCX. |
 
 ---
 
@@ -35,11 +40,12 @@ skills_paper/
 ├── thesis_guidelines_master.md          # version-independent thesis / technical-report master template
 └── plugins/
     ├── ai-paper/         .claude-plugin/plugin.json + skills/ai-paper/SKILL.md + templates/(+sections/)
+    ├── seismo-report/    .claude-plugin/plugin.json + skills/seismo-report/SKILL.md + seismo-report.md + templates/ + scripts/ (build_report.py, make_reference_docx.py, preamble_seismo.tex, seismo.css) + reference/ + examples/ + tests/
     ├── research-gap/     .claude-plugin/plugin.json + skills/research-gap/SKILL.md
     ├── compose-plan/     .claude-plugin/plugin.json + skills/compose-plan/SKILL.md
     ├── paper-reviewer/   .claude-plugin/plugin.json + skills/review/SKILL.md
-    ├── ppt-mkl/          .claude-plugin/plugin.json + skills/ppt-mkl/{SKILL.md,DECK_SPEC.md,template.deck,scripts/}
-    └── doc-tools/        .claude-plugin/plugin.json + skills/{doc-readermkl,documentation-agent,md-updater}/SKILL.md
+    ├── ppt-mkl/          .claude-plugin/plugin.json + skills/ppt-mkl/SKILL.md + DECK_SPEC.md + template.deck + scripts/
+    └── doc-tools/        .claude-plugin/plugin.json + skills/{doc-readermkl,documentation-agent,md-updater,methods-read-doc}/SKILL.md
 ```
 
 ---
@@ -52,10 +58,12 @@ Add the marketplace once, then install whichever plugins you want:
 /plugin marketplace add mklayek/skills_paper      # register this repo as a marketplace
 
 /plugin install ai-paper@skills-paper             # paper writing
+/plugin install arch-paper@skills-paper           # archaeological GPR papers
+/plugin install seismo-report@skills-paper        # seismological interpretation reports (MD/HTML/PDF/DOCX)
 /plugin install research-gap@skills-paper         # research-gap analysis
 /plugin install compose-plan@skills-paper         # project planning
 /plugin install paper-reviewer@skills-paper       # journal-style paper review
-/plugin install ppt-mkl@skills-paper              # research presentations (PPTX + Beamer/Madrid)
+/plugin install ppt-mkl@skills-paper              # research presentations (PPTX + Beamer)
 /plugin install doc-tools@skills-paper            # doc reading / maintenance
 
 /plugin                                            # browse / manage installed plugins

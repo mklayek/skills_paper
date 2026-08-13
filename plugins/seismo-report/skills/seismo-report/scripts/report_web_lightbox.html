@@ -1,0 +1,89 @@
+</main>
+<div id="rlb"><img src="" alt="zoomed figure"></div>
+<div id="rlbhint">scroll to zoom · click image edge or press Esc to close</div>
+<script>
+(function(){
+  var DEF_FONT = 18;
+  var font = DEF_FONT, z = 1;
+  var lb = document.getElementById('rlb'),
+      im = lb.querySelector('img'),
+      hint = document.getElementById('rlbhint'),
+      fwbtn = document.getElementById('fwbtn'),
+      dockbtn = document.getElementById('dockbtn');
+
+  /* ---- click any content figure to open the zoom viewer ---- */
+  document.querySelectorAll('#rmain img').forEach(function(g){
+    g.addEventListener('click', function(){ openLb(g.src); });
+  });
+  function openLb(src){ im.src = src; z = 1; im.style.transform = 'scale(1)';
+    lb.style.display = 'flex'; hint.style.display = 'block'; }
+  function closeLb(){ lb.style.display = 'none'; hint.style.display = 'none'; im.src = ''; z = 1; }
+  lb.addEventListener('click', function(e){ if (e.target === lb) closeLb(); });
+  im.addEventListener('click', function(e){ e.stopPropagation(); });
+  im.addEventListener('wheel', function(e){ e.preventDefault();
+    z = Math.min(7, Math.max(1, z + (e.deltaY < 0 ? 0.25 : -0.25)));
+    im.style.transform = 'scale(' + z + ')'; }, {passive:false});
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeLb(); });
+
+  /* ---- toolbar actions ---- */
+  window.rToggleDock = function(){
+    var hidden = document.body.classList.toggle('dock-hidden');
+    if (dockbtn) dockbtn.classList.toggle('on', !hidden);
+  };
+  window.rToggleWidth = function(){
+    var on = document.body.classList.toggle('fullwidth');
+    if (fwbtn){ fwbtn.classList.toggle('on', on);
+      fwbtn.textContent = on ? '▤ Reading width' : '↔️ Full width'; }
+  };
+  window.rFont = function(step){
+    font = Math.min(28, Math.max(13, font + step));
+    document.documentElement.style.fontSize = font + 'px';
+  };
+  window.rTop = function(){ window.scrollTo({top:0, behavior:'smooth'}); };
+  window.rReset = function(){
+    font = DEF_FONT; document.documentElement.style.fontSize = DEF_FONT + 'px';
+    document.body.classList.remove('fullwidth', 'dock-hidden');
+    if (fwbtn){ fwbtn.classList.remove('on'); fwbtn.textContent = '↔️ Full width'; }
+    if (dockbtn) dockbtn.classList.add('on');
+    closeLb(); window.scrollTo({top:0, behavior:'smooth'});
+  };
+
+  /* ---- scrollspy: highlight the current section in the docked TOC ---- */
+  var toc = document.getElementById('TOC');
+  if (toc){
+    var links = Array.prototype.slice.call(toc.querySelectorAll('a[href^="#"]'));
+    var map = {}, heads = [];
+    links.forEach(function(a){
+      var id = decodeURIComponent(a.getAttribute('href').slice(1));
+      var el = document.getElementById(id);
+      if (el){ map[id] = a; heads.push(el); }
+    });
+    heads.sort(function(p, q){ return topOf(p) - topOf(q); });
+    function topOf(el){ return el.getBoundingClientRect().top + window.pageYOffset; }
+    var ticking = false, lastActive = null;
+    function spy(){
+      ticking = false;
+      var y = window.pageYOffset + 90, cur = null;
+      for (var i = 0; i < heads.length; i++){
+        if (topOf(heads[i]) <= y) cur = heads[i]; else break;
+      }
+      if (!cur && heads.length) cur = heads[0];
+      var a = cur ? map[cur.id] : null;
+      if (a === lastActive) return;
+      links.forEach(function(x){ x.classList.remove('active'); });
+      if (a){
+        a.classList.add('active');
+        var r = a.getBoundingClientRect(), tr = toc.getBoundingClientRect();
+        if (r.top < tr.top + 44 || r.bottom > tr.bottom - 16) a.scrollIntoView({block:'center'});
+      }
+      lastActive = a;
+    }
+    window.addEventListener('scroll', function(){
+      if (!ticking){ ticking = true; window.requestAnimationFrame(spy); }
+    }, {passive:true});
+    window.addEventListener('resize', spy);
+    window.addEventListener('load', spy);
+    spy();
+  }
+})();
+</script>

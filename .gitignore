@@ -1,2 +1,3 @@
-__pycache__/
-*.pyc
+
+# personal branded end-slide image is kept local, not published
+**/assets/thankyou_slide.png

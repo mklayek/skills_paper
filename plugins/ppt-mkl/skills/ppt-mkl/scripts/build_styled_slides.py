@@ -129,7 +129,7 @@ class Slide:
 
 
 RE_EQ = re.compile(r"^\$\$(?P<tex>.*?)\$\$\s*(?:\((?P<tag>[0-9]+[a-z]?)\))?\s*$")
-RE_FIG = re.compile(r"^!fig:\s*(?P<path>\S.*?)\s+(?P<w>[0-9.]+)%\s*$")
+RE_FIG = re.compile(r"^!fig:\s*(?P<path>\S.*?)\s+(?P<w>[0-9.]+)%\s*(?:\|\s*(?P<cap>.+?))?\s*$")
 
 
 def parse_deck(path: str) -> list[Slide]:
@@ -158,7 +158,8 @@ def parse_deck(path: str) -> list[Slide]:
         m = RE_FIG.match(s)
         if m:
             cur.blocks.append(Block("fig", m.group("path").strip(),
-                                    width=float(m.group("w")) / 100.0))
+                                    width=float(m.group("w")) / 100.0,
+                                    tag=(m.group("cap") or "").strip()))
             continue
         if s.startswith("!key:"):
             cur.blocks.append(Block("key", s[5:].strip()))
@@ -381,14 +382,17 @@ def rich_runs(text: str, size_pt: float, omml: dict[str, str],
 # --------------------------------------------------------------------------- #
 # 4. Paragraph builders
 # --------------------------------------------------------------------------- #
-IND = {0: (0.36, 0.36), 1: (0.72, 0.30), 2: (1.05, 0.24)}   # (marL, hanging) inches
+IND = {0: (0.0, 0.0), 1: (0.30, 0.0), 2: (0.60, 0.0)}   # (marL, hanging) inches
+# Body text starts flush at the LEFT edge of the text box: marL=0 and hanging=0 for
+# level-0, so first line and wrapped lines both begin at the leftmost point (no gap,
+# no hanging indent). Nested levels get a small left margin but still no hanging.
 # Markers are ordinary TEXT characters in the run, not PowerPoint list bullets
 # (every paragraph carries <a:buNone/>). That way the user can select a line, copy it,
 # and the symbol travels with the text. Plain Unicode is used rather than Wingdings
 # private-use code points, which paste as broken glyphs outside PowerPoint.
-MARK = {0: ("\u2611  ", C_CHECK, F_SYM),     # checked box, level-0 statements
-        1: ("\u272A  ", C_RED, F_SYM),       # circled star, term / symbol definitions
-        2: ("\u25AA  ", C_RED, F_SYM)}       # small square, third level
+MARK = {0: ("\u25AA  ", "000000", F_SYM),    # solid black square, level-0 statements
+        1: ("\u25AA  ", "000000", F_SYM),    # solid black square, term / symbol definitions
+        2: ("\u25AA  ", "000000", F_SYM)}    # solid black square, third level
 
 
 def para(pPr: str, runs: str) -> str:
@@ -447,35 +451,35 @@ def build_paragraphs(blocks, omml: dict[str, str], scale: float) -> tuple[str, f
             height += eq_h
         elif b.kind == "key":
             size = SZ_KEY * scale
-            pPr = (f'<a:pPr marL="{emu(0.36)}" indent="{emu(-0.36)}">'
+            pPr = ('<a:pPr marL="0" indent="0">'
                    f'<a:spcBef><a:spcPts val="{int(420 * scale)}"/></a:spcBef>'
                    '<a:buNone/></a:pPr>')
-            runs = text_run("• ", size, bold=True, color=C_TEXT, font=F_SYM)
+            runs = text_run("▪  ", size, bold=True, color="000000", font=F_SYM)
             body, est = rich_runs(b.text, size, omml, base_bold=True)
             xml.append(para(pPr, runs + body))
-            cpl = max(12.0, (body_w - 0.36) / (size * 0.0063))
+            cpl = max(12.0, body_w / (size * 0.0063))
             height += math.ceil((est + 3) / cpl) * (size * 1.30 / 72.0) + 0.06
         elif b.kind == "ref":
             # References keep their own size no matter how full the slide is: the
             # auto-shrink deliberately does not touch them.
             size = SZ_REF
-            pPr = (f'<a:pPr marL="{emu(0.42)}" indent="{emu(-0.42)}">'
+            pPr = ('<a:pPr marL="0" indent="0">'
                    f'<a:spcBef><a:spcPts val="360"/></a:spcBef>'
                    '<a:buNone/></a:pPr>')
             body, est = rich_runs(b.text, size, omml, base_color=C_REF,
                                   font=F_REF, italic=True)
             xml.append(para(pPr, body))
-            cpl = max(12.0, (body_w - 0.42) / (size * 0.0076))
+            cpl = max(12.0, body_w / (size * 0.0076))
             height += math.ceil(est / cpl) * (size * 1.34 / 72.0) + 0.07
         elif b.kind == "so":
             size = SZ_SO * scale
-            pPr = (f'<a:pPr marL="{emu(0.36)}" indent="{emu(-0.36)}">'
+            pPr = ('<a:pPr marL="0" indent="0">'
                    f'<a:spcBef><a:spcPts val="{int(420 * scale)}"/></a:spcBef>'
                    '<a:buNone/></a:pPr>')
-            runs = text_run("• ", size, bold=True, color=C_SO, font=F_SYM)
+            runs = text_run("▪  ", size, bold=True, color=C_SO, font=F_SYM)
             body, est = rich_runs(b.text, size, omml, base_color=C_SO, font=F_HAND)
             xml.append(para(pPr, runs + body))
-            cpl = max(12.0, (body_w - 0.36) / (size * 0.0080))
+            cpl = max(12.0, body_w / (size * 0.0080))
             height += math.ceil((est + 3) / cpl) * (size * 1.34 / 72.0) + 0.06
     return "".join(xml), height, anchors
 
@@ -586,13 +590,17 @@ def add_frame(slide):
     return r
 
 
+_FOOTER_OPTS = {"no_date": False, "no_page": False}
+
+
 def add_footer(slide, date_s: str, foot: str, page: int):
     y, h = FOOT_Y, 0.30
-    for x, w, txt, align in (
-        (M_L + 0.15, 3.0, date_s, PP_ALIGN.LEFT),
-        (13.333 / 2 - 2.5, 5.0, foot, PP_ALIGN.CENTER),
-        (13.333 - M_R - 3.15, 3.0, str(page), PP_ALIGN.RIGHT),
-    ):
+    slots = [(13.333 / 2 - 2.5, 5.0, foot, PP_ALIGN.CENTER)]
+    if not _FOOTER_OPTS["no_date"]:
+        slots.insert(0, (M_L + 0.15, 3.0, date_s, PP_ALIGN.LEFT))
+    if not _FOOTER_OPTS["no_page"]:
+        slots.append((13.333 - M_R - 3.15, 3.0, str(page), PP_ALIGN.RIGHT))
+    for x, w, txt, align in slots:
         tb = slide.shapes.add_textbox(emu(x), emu(y), emu(w), emu(h))
         tf = tb.text_frame
         tf.word_wrap = False
@@ -663,12 +671,14 @@ def build_content_slide(prs, sl: Slide, omml: dict[str, str], date_s: str,
             print(f"  WARN: missing figure {b.text}")
 
     usable_w = 13.333 - M_L - M_R - 0.40
+    fig_cap = figs[0].tag if figs else ""
+    cap_h = 0.32 if fig_cap else 0.0
     fig_h = 0.0
     if figs:
         from PIL import Image
         with Image.open(figs[0].text) as im:
             iw, ih = im.size
-        want_h = min(4.35, usable_w * figs[0].width * ih / iw)
+        want_h = min(4.35 - cap_h, usable_w * figs[0].width * ih / iw)
         options = [want_h, want_h * 0.86, want_h * 0.72, max(1.75, want_h * 0.58)]
     else:
         options = [0.0]
@@ -676,7 +686,7 @@ def build_content_slide(prs, sl: Slide, omml: dict[str, str], date_s: str,
     _HL_RESET[0] = any("==" in b.text for b in sl.blocks
                        if b.kind in ("bullet", "key", "so"))
     for fh in options:                      # give the figure its space, then fit the body
-        avail = (FOOT_RULE_Y - 0.14 - fh) - BODY_TOP
+        avail = (FOOT_RULE_Y - 0.14 - fh - cap_h) - BODY_TOP
         scale = 1.0
         xml, hgt, anchors = build_paragraphs(sl.blocks, omml, scale)
         while hgt > avail and scale > MIN_SCALE:
@@ -690,8 +700,17 @@ def build_content_slide(prs, sl: Slide, omml: dict[str, str], date_s: str,
         h = fig_h
         w = min(usable_w, h * iw / ih)
         h = w * ih / iw
+        img_bottom = FOOT_RULE_Y - 0.12 - cap_h
         slide.shapes.add_picture(figs[0].text, emu((13.333 - w) / 2.0),
-                                 emu(FOOT_RULE_Y - 0.12 - h), emu(w), emu(h))
+                                 emu(img_bottom - h), emu(w), emu(h))
+        if fig_cap:                         # italic caption centred under the image
+            cb = slide.shapes.add_textbox(emu(M_L + 0.16), emu(img_bottom + 0.02),
+                                          emu(13.333 - M_L - M_R - 0.32), emu(cap_h))
+            cb.text_frame.word_wrap = True
+            set_txbody(cb,
+                       para('<a:pPr algn="ctr" marL="0" indent="0"><a:buNone/></a:pPr>',
+                            rich_runs(fig_cap, 13.5, omml, italic=True)[0]),
+                       anchor="t", autofit=False)
 
     box_x, box_w = M_L + 0.16, 13.333 - M_L - M_R - 0.32
 
@@ -764,6 +783,40 @@ def build_title_slide(prs, title: str, subtitle: str, author: str, date_s: str,
     add_footer(slide, date_s, foot, 1)
 
 
+def _asset(name: str) -> str:
+    return os.path.normpath(os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "assets", name)
+    ).replace("\\", "/")
+
+
+# A full-bleed designed slide is preferred; the line-art content slide is the fallback.
+THANKYOU_SLIDE = _asset("thankyou_slide.png")     # full-bleed branded Thank-You image
+THANKYOU_ASSET = _asset("thankyou_lineart.png")   # fallback line-drawing
+
+
+def ensure_thankyou(slides: "list[Slide]") -> None:
+    """Every deck ends with a graphical 'Thank you' slide. When the deck does not
+    already end with one, append it: a full-bleed branded image if bundled,
+    otherwise a content slide carrying the scientific line-drawing."""
+    if any("thank" in (s.title or "").lower() for s in slides):
+        return
+    s = Slide(title="Recap : **Thank you**")
+    if os.path.exists(THANKYOU_SLIDE):
+        s.fullbleed_img = THANKYOU_SLIDE          # rendered edge-to-edge, no title/footer
+    else:
+        if os.path.exists(THANKYOU_ASSET):
+            s.blocks.append(Block("fig", THANKYOU_ASSET, width=0.58))
+        s.blocks.append(Block("so", "Thank you for your attention. "
+                                    "Questions and discussion are welcome."))
+    slides.append(s)
+
+
+def build_fullbleed_slide(prs, img_path: str) -> None:
+    """A single image covering the whole slide, with no title bar or footer."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.shapes.add_picture(img_path, 0, 0, SLIDE_W, SLIDE_H)
+
+
 # --------------------------------------------------------------------------- #
 def main() -> None:
     ap = argparse.ArgumentParser(description="deck mini-language → styled PPTX")
@@ -774,9 +827,14 @@ def main() -> None:
     ap.add_argument("--author", default="")
     ap.add_argument("--date", default="")
     ap.add_argument("--foot", default="")
+    ap.add_argument("--no-date", action="store_true", help="omit the date from the footer")
+    ap.add_argument("--no-page", action="store_true", help="omit the page number from the footer")
     args = ap.parse_args()
+    _FOOTER_OPTS["no_date"] = args.no_date
+    _FOOTER_OPTS["no_page"] = args.no_page
 
     slides = parse_deck(args.input)
+    ensure_thankyou(slides)
     print(f"build_styled_slides: {args.input}")
     print(f"  parsed slides       : {len(slides)}")
 
@@ -796,7 +854,9 @@ def main() -> None:
         build_title_slide(prs, args.title, args.subtitle, args.author, args.date, args.foot)
         page += 1
     for sl in slides:
-        if sl.section:
+        if getattr(sl, "fullbleed_img", None):
+            build_fullbleed_slide(prs, sl.fullbleed_img)
+        elif sl.section:
             build_section_slide(prs, sl, args.date, args.foot, page)
         else:
             build_content_slide(prs, sl, omml, args.date, args.foot, page)
