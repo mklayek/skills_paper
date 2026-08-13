@@ -4,7 +4,9 @@
 Renders the "lecture" slide style used for the cganac_v2_r1 methodology talk:
 
   * underlined bold serif title with a red key phrase, over a double (grey+orange) rule;
-  * green checkbox bullets, red star sub-bullets, small dot sub-sub-bullets;
+  * black square bullets at every level, with the closing !key:/!so: lines marked
+    instead by a green check and a purple arrow, so a conclusion never looks like
+    one more statement;
   * native, editable PowerPoint equations (OMML via pandoc) with a red `---(N)`
     equation tag placed on the same line, preserving the source numbering;
   * a bold takeaway line and a purple handwriting "Therefore, ..." line;
@@ -15,6 +17,11 @@ Every !fig: gets its OWN slide carrying the parent slide's title: the image as l
 the slide allows, its caption underneath, and one or two lines of description condensed
 from that slide's !note: (or !key:). Never shrink a figure so it can share a slide with
 the bullets — use --no-fig-slides only when inline figures are explicitly wanted.
+
+The text area is then packed with content drawn forward from the next slide (whole-slide
+merge, then leading bullet groups) so nothing ships half empty. pack_slides() and its
+helpers live here and are imported by deck_to_beamer.py, so both back-ends behave the
+same; only the cost function differs — this one measures the real body height in inches.
 
 INPUT — strict line-prefix mini-language (see DECK_SPEC.md):
 
@@ -460,7 +467,8 @@ def build_paragraphs(blocks, omml: dict[str, str], scale: float) -> tuple[str, f
             pPr = ('<a:pPr marL="0" indent="0">'
                    f'<a:spcBef><a:spcPts val="{int(420 * scale)}"/></a:spcBef>'
                    '<a:buNone/></a:pPr>')
-            runs = text_run("▪  ", size, bold=True, color="000000", font=F_SYM)
+            # the takeaway is a conclusion, not another statement: green check
+            runs = text_run("✔  ", size, bold=True, color=C_CHECK, font=F_SYM)
             body, est = rich_runs(b.text, size, omml, base_bold=True)
             xml.append(para(pPr, runs + body))
             cpl = max(12.0, body_w / (size * 0.0063))
@@ -482,7 +490,8 @@ def build_paragraphs(blocks, omml: dict[str, str], scale: float) -> tuple[str, f
             pPr = ('<a:pPr marL="0" indent="0">'
                    f'<a:spcBef><a:spcPts val="{int(420 * scale)}"/></a:spcBef>'
                    '<a:buNone/></a:pPr>')
-            runs = text_run("▪  ", size, bold=True, color=C_SO, font=F_SYM)
+            # the consequence gets an arrow, distinct from both bullets and the check
+            runs = text_run("⇒  ", size, bold=True, color=C_SO, font=F_SYM)
             body, est = rich_runs(b.text, size, omml, base_color=C_SO, font=F_HAND)
             xml.append(para(pPr, runs + body))
             cpl = max(12.0, body_w / (size * 0.0080))
@@ -769,6 +778,155 @@ def figure_description(sl: Slide) -> str:
     return key.text if key else ""
 
 
+# --------------------------------------------------------------------------- #
+# Filling the text area — shared by both back-ends
+#
+# A half-empty slide next to a full one reads as a mistake, so before rendering
+# we draw content forward from the next slide. deck_to_beamer.py imports all of
+# this and supplies its own cost function, so the two back-ends pack identically.
+# --------------------------------------------------------------------------- #
+TITLE_MAX = 72          # visible chars that still fit one title line
+TITLE_STOP = {"and", "or", "the", "a", "an", "of", "in", "on", "for", "to",
+              "with", "from", "as", "at", "by", "its", "their", "—", "-"}
+MIN_DONOR_GROUPS = 2    # bullet groups a donor slide always keeps
+
+
+def vislen(s: str) -> int:
+    return len(re.sub(r"[*=]", "", s))
+
+
+def title_prefix(title: str) -> str:
+    """`Attn : Scoring alignment` -> `Attn`. Slides sharing it are one sub-topic."""
+    return title.split(" : ", 1)[0].strip() if " : " in title else ""
+
+
+def title_topic(title: str) -> str:
+    return title.split(" : ", 1)[1].strip() if " : " in title else title.strip()
+
+
+def joined_title(a: str, b: str) -> str:
+    """Title for a slide that now carries content from two source slides.
+
+    A title that wraps steals body height, which defeats the whole point of
+    filling the slide — so the second topic is shortened word by word rather than
+    dropped outright, and only abandoned when even three words will not fit.
+    """
+    pa, pb, ta, tb = title_prefix(a), title_prefix(b), title_topic(a), title_topic(b)
+    if not (pa and pb):
+        return a if vislen(f"{a} · {b}") > TITLE_MAX else f"{a} · {b}"
+    # `a` may already be a joined title, so its prefix can carry several names;
+    # dedupe and keep at most two so repeated merges cannot pile them up.
+    names = []
+    for p in pa.split(" · ") + [pb]:
+        if p not in names:
+            names.append(p)
+    head = f"{' · '.join(names[:2])} : {ta}"
+    words = tb.split()
+    while words:
+        cand = f"{head} · {' '.join(words)}"
+        if vislen(cand) <= TITLE_MAX:
+            # a truncated topic must not end on a dangling connector or article
+            while words and words[-1].lower().strip("*=,;:") in TITLE_STOP:
+                words = words[:-1]
+                if len(words) < 2:
+                    return head
+                cand = f"{head} · {' '.join(words)}"
+            return cand.rstrip(" —-·,;:")
+        if len(words) <= 3:
+            break
+        words = words[:-1]
+    return head
+
+
+def mergeable(sl) -> bool:
+    """Reference slides keep their fixed 5-per-slide layout; never pack them."""
+    if sl.section or getattr(sl, "fullbleed_img", None):
+        return False
+    return not any(b.kind == "ref" for b in sl.blocks)
+
+
+def freeze_fig_desc(sl) -> None:
+    """Pin each figure's description before its slide's notes get combined."""
+    d = figure_description(sl)
+    for b in sl.blocks:
+        if b.kind == "fig" and not b.desc:
+            b.desc = d
+
+
+def bullet_groups(blocks: list) -> list:
+    """Leading run of bullets, grouped as one level-0 bullet plus its sub-bullets.
+
+    Only this leading run is movable: pulling a bullet out from behind an equation
+    or a takeaway would tear it away from what it explains.
+    """
+    groups, cur = [], []
+    for b in blocks:
+        if b.kind != "bullet":
+            break
+        if b.level == 0 and cur:
+            groups.append(cur)
+            cur = []
+        cur.append(b)
+    if cur:
+        groups.append(cur)
+    return groups
+
+
+def insert_before_closing(sl, blocks: list) -> None:
+    """Body content goes above the !key:/!so: conclusion, never after it."""
+    idx = next((i for i, b in enumerate(sl.blocks) if b.kind in ("key", "so")),
+               len(sl.blocks))
+    sl.blocks[idx:idx] = blocks
+
+
+def pack_slides(slides: list, cost, capacity: float, target: float) -> list:
+    """Fill each slide's text area, drawing content forward from the next slide.
+
+    `cost(blocks) -> float` measures a body in whatever unit the back-end uses;
+    `capacity` is one slide's worth of that unit and `target` the fill below which
+    a slide tries to pull more in. Two passes, both stopping at a `#` section:
+
+    1. whole-slide merge while the combined body still fits one slide;
+    2. pull leading bullet groups off the next slide, leaving it MIN_DONOR_GROUPS.
+    """
+    out, merged, pulled = [], 0, 0
+    for sl in slides:
+        prev = out[-1] if out else None
+        if (prev is not None and mergeable(prev) and mergeable(sl)
+                and cost(prev.blocks + sl.blocks) <= capacity):
+            freeze_fig_desc(prev)
+            freeze_fig_desc(sl)
+            prev.title = joined_title(prev.title, sl.title)
+            prev.blocks = prev.blocks + sl.blocks
+            prev.notes = list(prev.notes) + list(sl.notes)
+            merged += 1
+            continue
+
+        # pass 2 — top up the slide already placed, from the one about to be placed
+        if (prev is not None and mergeable(prev) and mergeable(sl)
+                and cost(prev.blocks) < target):
+            took = []
+            groups = bullet_groups(sl.blocks)
+            while (len(groups) - len(took)) > MIN_DONOR_GROUPS:
+                g = groups[len(took)]
+                if cost(prev.blocks + g) > capacity:
+                    break
+                insert_before_closing(prev, g)
+                took.append(g)
+                if cost(prev.blocks) >= target:
+                    break
+            if took:
+                moved = [b for g in took for b in g]
+                sl.blocks = [b for b in sl.blocks if b not in moved]
+                prev.title = joined_title(prev.title, sl.title)
+                pulled += len(took)
+        out.append(sl)
+    if merged or pulled:
+        print(f"  filled text area: {merged} slides merged, "
+              f"{pulled} bullet groups pulled forward")
+    return out
+
+
 def build_figure_slide(prs, sl: Slide, fig, omml: dict[str, str], date_s: str,
                        foot: str, page: int) -> None:
     """One figure, as large as the slide allows, with caption and description.
@@ -926,6 +1084,12 @@ def main() -> None:
                     help="give every figure its own slide (default)")
     ap.add_argument("--no-fig-slides", dest="fig_slides", action="store_false",
                     help="keep figures inline under the bullets")
+    ap.add_argument("--merge-slides", dest="merge_slides", action="store_true",
+                    default=True,
+                    help="fill the text area by merging slides and pulling "
+                         "bullets forward (default)")
+    ap.add_argument("--no-merge-slides", dest="merge_slides", action="store_false",
+                    help="render every slide exactly as written in the deck")
     args = ap.parse_args()
     fig_slides = args.fig_slides
     _FOOTER_OPTS["no_date"] = args.no_date
@@ -944,6 +1108,14 @@ def main() -> None:
     print(f"  distinct equations  : {len(tex_list)}")
     omml = build_omml_map(tex_list)
     print(f"  converted to OMML   : {len(omml)}")
+
+    if args.merge_slides:
+        # Unlike the Beamer side we can measure exactly: build_paragraphs returns
+        # the body height in inches, so capacity is the real text-box height.
+        capacity = (FOOT_RULE_Y - 0.14) - BODY_TOP
+        slides = pack_slides(slides,
+                             lambda blocks: build_paragraphs(blocks, omml, 1.0)[1],
+                             capacity, 0.80 * capacity)
 
     prs = Presentation()
     prs.slide_width, prs.slide_height = SLIDE_W, SLIDE_H

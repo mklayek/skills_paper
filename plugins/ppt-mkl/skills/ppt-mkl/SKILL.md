@@ -153,9 +153,9 @@ by `--beamer-theme none`).
 
 ## Filling the text area (Beamer)
 
-A half-empty slide next to a full one reads as a mistake. Before rendering, the themed
-Beamer build **packs each frame's text area with content drawn forward from the next
-slide**, in two passes:
+A half-empty slide next to a full one reads as a mistake. Before rendering, **both
+back-ends** pack each slide's text area with content drawn forward from the next slide, in
+two passes:
 
 1. **Whole-slide merge** — while two adjacent slides' bodies together still fit one frame,
    they become one slide.
@@ -180,19 +180,30 @@ ever shown.
   `!note:` text.
 - `--no-merge-slides` renders every slide exactly as written.
 
-Tuning constants in `deck_to_beamer.py`, all in estimated rendered lines and calibrated
-against the actual PDF: `FRAME_LINES` (capacity), `TARGET_FILL` (the point below which a
-slide pulls content forward), `MIN_DONOR_GROUPS`, and `TITLE_MAX`.
+The engine (`pack_slides`, `joined_title`, `bullet_groups`, …) lives in
+`build_styled_slides.py` and is imported by `deck_to_beamer.py`, so the two back-ends
+cannot drift. Only the **cost function** differs:
+
+| | Cost | Capacity |
+|---|---|---|
+| PPTX | `build_paragraphs(...)[1]` — exact body height in inches | `FOOT_RULE_Y - 0.14 - BODY_TOP` ≈ 5.74 in |
+| Beamer | `block_lines()` — estimated rendered lines | `FRAME_LINES` = 28, `TARGET_FILL` = 22.5 |
+
+> **The two will not reach the same slide count, and that is not a bug.** The PPTX body is
+> 20/18/16 pt Times; the Beamer body is 11 pt sans. The PPTX simply holds less text per
+> slide, so it settles higher (GPRTransNet: 86 vs 66). Do **not** close that gap by
+> shrinking the PPTX fonts.
 
 > Some slides still end under-full — the last slide of a section has nothing it may borrow
-> from, and a neighbour that would overflow the frame is left alone. That is correct
-> behaviour, not a miss.
+> from, and a neighbour that would overflow is left alone. That is correct behaviour, not a
+> miss.
 
 ## The closing lines get their own markers
 
-`!key:` and `!so:` are conclusions, not more statements, so in themed Beamer they do **not**
-take the theme's bullet: `!key:` gets a green ✔ and `!so:` a purple ⇒. That keeps the
-takeaway visually separate from the body it summarises.
+`!key:` and `!so:` are conclusions, not more statements, so in **both** back-ends they do
+not take the ordinary bullet: `!key:` gets a green ✔ and `!so:` a purple ⇒. That keeps the
+takeaway visually separate from the body it summarises. (Only `--beamer-theme none` keeps
+the old unmarked lines.)
 
 | Flag | Default | Effect |
 |---|---|---|
@@ -255,8 +266,8 @@ Chrome differs by back-end and that is intentional:
 | Bullets | black squares, flush left | Madrid shaded blue balls, nested |
 | Body font | Times New Roman | theme sans-serif (no `mathpazo`) |
 | Figures | own slide + description | own frame + description |
-| `!key:` / `!so:` | no marker | green ✔ / purple ⇒ |
-| Under-full slides | left as written | packed from the next slide |
+| `!key:` / `!so:` | green ✔ / purple ⇒ | green ✔ / purple ⇒ |
+| Under-full slides | packed from the next slide | packed from the next slide |
 | Footer | date \| label \| page | short author \| label \| date + page |
 
 The **content** palette above is shared and must never drift between the two.
