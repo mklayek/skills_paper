@@ -127,14 +127,24 @@ replace. Themed mode also drops `mathpazo`, so the deck is sans-serif like the g
 sets the class to **11pt**; list spacing is pulled in via `etoolbox` so `[shrink=25]` rarely
 has to fire and the body stays legible.
 
+**Figures get their own frame.** A figure sharing a slide with a full set of bullets has to
+be capped to a fraction of the text height and comes out unreadably small. In themed mode
+each `!fig:` is lifted onto its **own frame** under the same title, at ~72 % of the slide
+height, with its caption underneath and one or two lines of description taken from that
+slide's `!note:` (falling back to `!key:`). The bullets stay on the preceding frame.
+
+> Practical consequence: a deck grows by one frame per figure — the GPRTransNet deck goes
+> 68 → 90 frames. That is expected; **never shrink a figure to avoid the extra frame.**
+
 `--beamer-theme none` keeps the old behaviour exactly: 10pt, `mathpazo` serif, hand-built
-black-square bullets, underlined title over the grey+orange rule.
+black-square bullets, inline figures, underlined title over the grey+orange rule.
 
 | Flag | Default | Effect |
 |---|---|---|
 | `--beamer-theme` | `Madrid` | any beamer theme name; `none` = the old hand-built chrome |
 | `--beamer-colortheme` | `default` | beamer color theme |
 | `--author-short` | `M. K. Layek — CNU` | left cell of Madrid's footline |
+| `--fig-slides` / `--no-fig-slides` | on when themed | one dedicated frame per figure vs. inline |
 
 The PPTX back-end is unaffected — it keeps the underlined-title lecture style.
 
@@ -188,6 +198,7 @@ Chrome differs by back-end and that is intentional:
 | Title | underlined, grey+orange rule | Madrid blue frametitle bar |
 | Bullets | black squares, flush left | Madrid shaded blue balls, nested |
 | Body font | Times New Roman | theme sans-serif (no `mathpazo`) |
+| Figures | inline, bottom-anchored | own frame, ~72 % height + description |
 | Footer | date \| label \| page | short author \| label \| date + page |
 
 The **content** palette above is shared and must never drift between the two.

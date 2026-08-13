@@ -14,6 +14,11 @@ emitted as real nested itemize, so the theme's own bullets apply (Madrid: shaded
 balls, smaller at each level). Themed mode also skips mathpazo (sans-serif, like the
 beamer gallery) and sets 11pt; --beamer-theme none restores 10pt serif black squares.
 
+Figures are NOT shrunk to share a slide with the bullets. In themed mode every !fig: gets
+its own frame under the same title at ~72% of the slide height, with its caption and one
+or two lines of description drawn from that slide's !note: (or !key:). Use
+--no-fig-slides to keep them inline.
+
 The Beamer back-end uses the **Madrid** theme by default (Madrid-default-default,
 https://deic.uab.cat/~iblanes/beamer_gallery/individual/Madrid-default-default.html):
 a blue frametitle bar, an infolines headline carrying the section name, and Madrid's
@@ -177,12 +182,60 @@ def marker_level(b) -> int:
 # --------------------------------------------------------------------------- #
 # Emitters
 # --------------------------------------------------------------------------- #
-def slide_body_tex(sl, themed: bool = True) -> str:
+def condense(text: str, max_words: int = 42) -> str:
+    """Trim a speaker note down to a one-or-two-line figure description."""
+    words = text.split()
+    if len(words) <= max_words:
+        return text.strip()
+    cut = " ".join(words[:max_words])
+    # prefer to end on a sentence boundary if one is close to the cut
+    dot = max(cut.rfind(". "), cut.rfind("; "))
+    if dot > len(cut) * 0.5:
+        return cut[:dot + 1].strip()
+    return cut.rstrip(",;:") + " …"
+
+
+def figure_frames_tex(sl, title: str) -> list:
+    """One dedicated frame per figure: large image + caption + short description.
+
+    Figures compete badly with a full slide of bullets — capped to a fraction of
+    the text height they come out unreadably small. Giving each figure its own
+    frame lets it run to ~72% of the slide height, with its caption underneath
+    and one or two lines of description from the slide's !note:.
+    """
+    figs = [b for b in sl.blocks if b.kind == "fig" and os.path.exists(b.text)]
+    if not figs:
+        return []
+    desc = condense(" ".join(sl.notes)) if sl.notes else ""
+    if not desc:
+        key = next((b for b in sl.blocks if b.kind == "key"), None)
+        desc = key.text if key else ""
+
+    frames = []
+    for b in figs:
+        body = [r"\begin{frame}{" + tex_escape(title) + "}",
+                r"\vfill\begin{center}",
+                r"\includegraphics[width=0.92\textwidth,height=0.72\textheight,"
+                r"keepaspectratio]{%s}" % b.text]
+        if b.tag:
+            body.append(r"\\[0.6ex]{\footnotesize\itshape " + tex_escape(b.tag) + "}")
+        body.append(r"\end{center}")
+        if desc:
+            body.append(r"\vfill{\footnotesize " + inline_tex(desc) + r"}\vfill")
+        else:
+            body.append(r"\vfill")
+        body.append(r"\end{frame}")
+        frames.append("\n".join(body))
+    return frames
+
+
+def slide_body_tex(sl, themed: bool = True, skip_figs: bool = False) -> str:
     """Emit one slide's body.
 
     themed=True  -> real nested itemize, so the beamer theme's own bullets apply
                     (Madrid: shaded blue balls, smaller at each level).
     themed=False -> the hand-built flush-left black squares of the plain chrome.
+    skip_figs    -> omit !fig: blocks (they get their own frame instead).
     """
     lines = []
     depth = 0                      # how many itemize environments are open
@@ -235,7 +288,7 @@ def slide_body_tex(sl, themed: bool = True) -> str:
             lines.append(r"\mklref{" + inline_tex(b.text) + "}")
         elif b.kind == "so":
             lines.append(r"\mklso{" + inline_tex(b.text) + "}")
-        elif b.kind == "fig" and os.path.exists(b.text):
+        elif b.kind == "fig" and not skip_figs and os.path.exists(b.text):
             cap = (r"\\[0.2ex]{\footnotesize\itshape %s}" % tex_escape(b.tag)) if b.tag else ""
             lines.append(r"\begin{center}\includegraphics[width=%.2f\textwidth,"
                          r"height=0.42\textheight,keepaspectratio]{%s}%s\end{center}"
@@ -252,6 +305,11 @@ def build_tex(slides, args) -> str:
     theme = (getattr(args, "beamer_theme", "") or DEFAULT_THEME).strip()
     ctheme = (getattr(args, "beamer_colortheme", "") or DEFAULT_COLORTHEME).strip()
     plain = theme.lower() in ("", "none", "default")
+    # Dedicated figure frames: on by default for a named theme, off for the plain
+    # chrome so legacy decks re-render exactly as before. --no-fig-slides overrides.
+    fig_slides = getattr(args, "fig_slides", None)
+    if fig_slides is None:
+        fig_slides = not plain
 
     body = PREAMBLE + (PREAMBLE_PLAIN_CHROME if plain else "")
     pre = (body.replace("=RED=", "{" + C_RED + "}")
@@ -296,10 +354,12 @@ def build_tex(slides, args) -> str:
             continue
         title = strip_marks(sl.title)
         out.append(r"\begin{frame}[shrink=25]{" + tex_escape(title) + "}")
-        out.append(slide_body_tex(sl, themed=not plain))
+        out.append(slide_body_tex(sl, themed=not plain, skip_figs=fig_slides))
         if sl.notes:
             out.append(r"\note{" + tex_escape(" ".join(sl.notes)) + "}")
         out.append(r"\end{frame}")
+        if fig_slides:
+            out.extend(figure_frames_tex(sl, title))
     out.append(r"\end{document}")
     return "\n".join(out)
 
@@ -353,6 +413,10 @@ def main() -> None:
                     help="beamer theme (default: Madrid; 'none' = hand-built chrome)")
     ap.add_argument("--beamer-colortheme", default=DEFAULT_COLORTHEME,
                     help="beamer color theme (default: default)")
+    ap.add_argument("--fig-slides", dest="fig_slides", action="store_true", default=None,
+                    help="give every figure its own frame (default with a named theme)")
+    ap.add_argument("--no-fig-slides", dest="fig_slides", action="store_false",
+                    help="keep figures inline under the bullets")
     ap.add_argument("--no-date", action="store_true", help="omit the date from the footline")
     ap.add_argument("--no-page", action="store_true", help="omit the frame number from the footline")
     ap.add_argument("--md-only", action="store_true")
