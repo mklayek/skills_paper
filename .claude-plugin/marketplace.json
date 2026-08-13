@@ -32,6 +32,13 @@
       "category": "planning"
     },
     {
+      "name": "ppt-mkl",
+      "description": "Research presentations from one .deck source: PPTX with native editable equations, plus Beamer PDF/.tex/.md on the Madrid theme.",
+      "source": "./plugins/ppt-mkl",
+      "author": { "name": "Mrinal Kanti Layek" },
+      "category": "presentation"
+    },
+    {
       "name": "doc-tools",
       "description": "Read, maintain, and update research/project documentation (.md/.txt/.pdf/.doc/.xls): doc-reader, documentation-agent, md-updater.",
       "source": "./plugins/doc-tools",

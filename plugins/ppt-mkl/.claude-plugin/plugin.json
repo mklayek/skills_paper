@@ -1,0 +1,6 @@
+{
+  "name": "ppt-mkl",
+  "description": "Build MKL lecture-style research decks from one plain-text .deck source: PPTX with native editable equations, plus Beamer PDF/.tex/.md on the Madrid theme.",
+  "version": "1.1.0",
+  "author": { "name": "Mrinal Kanti Layek", "email": "layek.mk@gmail.com" }
+}

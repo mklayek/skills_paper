@@ -19,6 +19,7 @@ manuscripts never get fabricated results.
 | **`research-gap`** | `research-gap` | Identify research gaps from uploaded papers/links and propose novel research projects. |
 | **`compose-plan`** | `compose-plan` | Generate structured development plans for geophysics / GPR / seismic / AI-ML projects. |
 | **`paper-reviewer`** | `review` | Analyze a paper PDF as a rigorous journal reviewer → comprehensive review report. |
+| **`ppt-mkl`** | `ppt-mkl` | Research decks from one `.deck` source → PPTX (native editable equations) + Beamer PDF/`.tex`/`.md` on the **Madrid** theme. |
 | **`doc-tools`** | `doc-readermkl`, `documentation-agent`, `md-updater` | Read, maintain, and update project/research docs (.md/.txt/.pdf/.doc/.xls). |
 
 ---
@@ -37,6 +38,7 @@ skills_paper/
     ├── research-gap/     .claude-plugin/plugin.json + skills/research-gap/SKILL.md
     ├── compose-plan/     .claude-plugin/plugin.json + skills/compose-plan/SKILL.md
     ├── paper-reviewer/   .claude-plugin/plugin.json + skills/review/SKILL.md
+    ├── ppt-mkl/          .claude-plugin/plugin.json + skills/ppt-mkl/{SKILL.md,DECK_SPEC.md,template.deck,scripts/}
     └── doc-tools/        .claude-plugin/plugin.json + skills/{doc-readermkl,documentation-agent,md-updater}/SKILL.md
 ```
 
@@ -53,6 +55,7 @@ Add the marketplace once, then install whichever plugins you want:
 /plugin install research-gap@skills-paper         # research-gap analysis
 /plugin install compose-plan@skills-paper         # project planning
 /plugin install paper-reviewer@skills-paper       # journal-style paper review
+/plugin install ppt-mkl@skills-paper              # research presentations (PPTX + Beamer/Madrid)
 /plugin install doc-tools@skills-paper            # doc reading / maintenance
 
 /plugin                                            # browse / manage installed plugins
