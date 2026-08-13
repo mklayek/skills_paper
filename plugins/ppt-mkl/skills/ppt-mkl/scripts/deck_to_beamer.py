@@ -5,10 +5,14 @@ Companion to build_styled_slides.py (which renders the same .deck to a styled PP
 One source, four artefacts: .deck -> .md + .tex + .pdf (+ .pptx from the other tool),
 all carrying the same lecture style:
 
-  * black-square bullets at every level, flush-left body text;
   * display equations keeping the SOURCE's own numbers, printed as a red ---(N);
   * a bold takeaway line and a purple handwriting "Therefore, ..." line;
   * bottom figure with an italic caption, and a graphical Thank-You end slide.
+
+Bullets differ by back-end on purpose. The PPTX keeps black squares; the Beamer body is
+emitted as real nested itemize, so the theme's own bullets apply (Madrid: shaded blue
+balls, smaller at each level). Themed mode also skips mathpazo (sans-serif, like the
+beamer gallery) and sets 11pt; --beamer-theme none restores 10pt serif black squares.
 
 The Beamer back-end uses the **Madrid** theme by default (Madrid-default-default,
 https://deic.uab.cat/~iblanes/beamer_gallery/individual/Madrid-default-default.html):
@@ -62,7 +66,6 @@ DEFAULT_AUTHOR = ("Dr. Mrinal Kanti Layek — Geophysics & AI Lab, "
 DEFAULT_AUTHOR_SHORT = "M. K. Layek — CNU"
 
 PREAMBLE = r"""
-\usepackage{mathpazo}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{xcolor}
@@ -70,6 +73,16 @@ PREAMBLE = r"""
 \usepackage[normalem]{ulem}
 \usepackage{caption}\captionsetup{font={footnotesize,stretch=1.0}}
 \usepackage{pifont}
+\usepackage{etoolbox}
+
+% Dense research decks: keep the theme's own bullet glyphs but pull the vertical
+% spacing in, so [shrink] has far less work to do and the body stays legible.
+\AtBeginEnvironment{itemize}{%
+  \setlength{\itemsep}{0.35ex}\setlength{\parskip}{0pt}%
+  \setlength{\parsep}{0pt}\setlength{\topsep}{0.35ex}}
+\setlength{\leftmargini}{1.6em}
+\setlength{\leftmarginii}{1.4em}
+\setlength{\leftmarginiii}{1.2em}
 
 \definecolor{mklred}{HTML}=RED=
 \definecolor{mklterm}{HTML}=TERM=
@@ -100,6 +113,7 @@ PREAMBLE = r"""
 # A named theme (Madrid by default) supplies its own frametitle bar and footline,
 # so these overrides are emitted ONLY when no theme is in play.
 PREAMBLE_PLAIN_CHROME = r"""
+\usepackage{mathpazo}
 \setbeamercolor{frametitle}{fg=black}
 \setbeamerfont{frametitle}{series=\bfseries,size=\large}
 \setbeamertemplate{frametitle}{%
@@ -163,18 +177,48 @@ def marker_level(b) -> int:
 # --------------------------------------------------------------------------- #
 # Emitters
 # --------------------------------------------------------------------------- #
-def slide_body_tex(sl) -> str:
-    lines, item_open = [], False
+def slide_body_tex(sl, themed: bool = True) -> str:
+    """Emit one slide's body.
+
+    themed=True  -> real nested itemize, so the beamer theme's own bullets apply
+                    (Madrid: shaded blue balls, smaller at each level).
+    themed=False -> the hand-built flush-left black squares of the plain chrome.
+    """
+    lines = []
+    depth = 0                      # how many itemize environments are open
+
+    def close_lists(to: int = 0):
+        nonlocal depth
+        while depth > to:
+            lines.append(r"\end{itemize}")
+            depth -= 1
+
+    def open_lists(to: int):
+        nonlocal depth
+        while depth < to:
+            lines.append(r"\begin{itemize}")
+            depth += 1
+
     MARK = {0: r"\mklsquare", 1: r"\mklsquare", 2: r"\mklsquare"}
     IND = {0: "0pt", 1: "14pt", 2: "26pt"}
     for b in sl.blocks:
         if b.kind == "bullet":
             lv = marker_level(b)
-            # flush left, no hanging indent (wrapped lines align at the left margin)
-            lines.append(rf"\par\smallskip\noindent\hangindent=0pt\hspace*{{{IND[lv]}}}"
-                         rf"{MARK[lv]}~{inline_tex(b.text)}")
-            item_open = True
-        elif b.kind == "eq":
+            if themed:
+                # levels are 0-based in the deck, nesting depth is 1-based
+                want = lv + 1
+                if want < depth:
+                    close_lists(want)
+                open_lists(want)
+                lines.append(r"\item " + inline_tex(b.text))
+            else:
+                # flush left, no hanging indent (wrapped lines align at the left margin)
+                lines.append(rf"\par\smallskip\noindent\hangindent=0pt\hspace*{{{IND[lv]}}}"
+                             rf"{MARK[lv]}~{inline_tex(b.text)}")
+            continue
+        # anything that is not a bullet ends the current list nesting
+        close_lists(0)
+        if b.kind == "eq":
             tag = rf"\mkltag{{{b.tag}}}" if b.tag else ""
             if b.tag:
                 # \makebox at full line width gives the \hfill glue something to
@@ -196,7 +240,7 @@ def slide_body_tex(sl) -> str:
             lines.append(r"\begin{center}\includegraphics[width=%.2f\textwidth,"
                          r"height=0.42\textheight,keepaspectratio]{%s}%s\end{center}"
                          % (min(b.width, 0.95), b.text, cap))
-    del item_open
+    close_lists(0)
     return "\n".join(lines)
 
 
@@ -227,7 +271,11 @@ def build_tex(slides, args) -> str:
     t_short = tex_escape(args.foot or args.title)
     d_short = "" if args.no_date else tex_escape(args.date)
 
-    out = [r"\documentclass[aspectratio=169,10pt]{beamer}", use, pre,
+    # A named theme gets 11pt (matches the beamer gallery's density); the plain
+    # chrome keeps 10pt so older decks re-render identically.
+    docclass = (r"\documentclass[aspectratio=169,10pt]{beamer}" if plain
+                else r"\documentclass[aspectratio=169,11pt]{beamer}")
+    out = [docclass, use, pre,
            r"\title[" + t_short + "]{" + tex_escape(args.title) + "}",
            r"\subtitle{" + tex_escape(args.subtitle) + "}",
            r"\author[" + a_short + "]{" + tex_escape(args.author) + "}",
@@ -248,7 +296,7 @@ def build_tex(slides, args) -> str:
             continue
         title = strip_marks(sl.title)
         out.append(r"\begin{frame}[shrink=25]{" + tex_escape(title) + "}")
-        out.append(slide_body_tex(sl))
+        out.append(slide_body_tex(sl, themed=not plain))
         if sl.notes:
             out.append(r"\note{" + tex_escape(" ".join(sl.notes)) + "}")
         out.append(r"\end{frame}")

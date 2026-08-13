@@ -119,6 +119,17 @@ The Beamer back-end builds on the
 theme by default (`Madrid-default-default`): blue frametitle bar, infolines headline, and
 Madrid's own footline of *short author | foot label | date + page*.
 
+**Bullets come from the theme, not from us.** In themed mode the body is emitted as real
+nested `itemize` environments, so `-` / `--` / `---` render as Madrid's own shaded blue
+balls, smaller at each level, with the theme's indentation. Do **not** reintroduce manual
+glyphs (`\ding`, black squares) on the Beamer side — that is what the themed path exists to
+replace. Themed mode also drops `mathpazo`, so the deck is sans-serif like the gallery, and
+sets the class to **11pt**; list spacing is pulled in via `etoolbox` so `[shrink=25]` rarely
+has to fire and the body stays legible.
+
+`--beamer-theme none` keeps the old behaviour exactly: 10pt, `mathpazo` serif, hand-built
+black-square bullets, underlined title over the grey+orange rule.
+
 | Flag | Default | Effect |
 |---|---|---|
 | `--beamer-theme` | `Madrid` | any beamer theme name; `none` = the old hand-built chrome |
@@ -172,9 +183,11 @@ reference and inline citation** · red `C00000` key phrases and equation tags ·
 
 Chrome differs by back-end and that is intentional:
 
-| | PPTX | Beamer |
+| | PPTX | Beamer (themed) |
 |---|---|---|
 | Title | underlined, grey+orange rule | Madrid blue frametitle bar |
+| Bullets | black squares, flush left | Madrid shaded blue balls, nested |
+| Body font | Times New Roman | theme sans-serif (no `mathpazo`) |
 | Footer | date \| label \| page | short author \| label \| date + page |
 
 The **content** palette above is shared and must never drift between the two.
