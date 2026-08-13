@@ -54,12 +54,12 @@ title contains "Thank you".
 
 ## Slide budget rules
 - ≤ 6 level-0 bullets, ≤ 2 display equations, ≤ 1 figure per slide.
-- A slide with a figure gets ≤ 3 bullets and ≤ 1 equation. This budget is set by the
-  **PPTX**, where the figure shares the slide. The themed Beamer build lifts each `!fig:`
-  onto its own frame, so the figure is never the thing that overflows there — but keep to
-  the budget anyway so both back-ends stay readable from one source.
-- Give every figure slide a `!note:` — the themed Beamer build prints it, condensed to one
-  or two lines, as the description under the figure on its dedicated frame.
+- A slide with a figure gets ≤ 3 bullets and ≤ 1 equation. Both back-ends now lift each
+  `!fig:` onto its own slide, so the figure is never what overflows — but keep to the
+  budget anyway, since the bullets still have to fit the slide they stay on.
+- **Give every figure slide a `!note:`.** Both back-ends print it, condensed to one or two
+  lines, as the description under the figure on its dedicated slide. Without one they fall
+  back to `!key:`, and with neither the figure ships bare.
 - If a source block needs more, SPLIT into two slides with `(1/2)` / `(2/2)` NOT in the title —
   instead give each half its own distinct topical title.
 - Bullet text ≤ ~22 words. Symbol-definition bullets are short: `$ symbol $ — meaning.`

@@ -48,7 +48,8 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_styled_slides import RE_DEFN, TOKEN, parse_deck, ensure_thankyou  # noqa: E402
+from build_styled_slides import (RE_DEFN, TOKEN, parse_deck, ensure_thankyou,  # noqa: E402
+                                 figure_description)
 
 # --------------------------------------------------------------------------- #
 # Shared style constants (kept in step with build_styled_slides.py)
@@ -182,19 +183,6 @@ def marker_level(b) -> int:
 # --------------------------------------------------------------------------- #
 # Emitters
 # --------------------------------------------------------------------------- #
-def condense(text: str, max_words: int = 42) -> str:
-    """Trim a speaker note down to a one-or-two-line figure description."""
-    words = text.split()
-    if len(words) <= max_words:
-        return text.strip()
-    cut = " ".join(words[:max_words])
-    # prefer to end on a sentence boundary if one is close to the cut
-    dot = max(cut.rfind(". "), cut.rfind("; "))
-    if dot > len(cut) * 0.5:
-        return cut[:dot + 1].strip()
-    return cut.rstrip(",;:") + " …"
-
-
 def figure_frames_tex(sl, title: str) -> list:
     """One dedicated frame per figure: large image + caption + short description.
 
@@ -206,10 +194,7 @@ def figure_frames_tex(sl, title: str) -> list:
     figs = [b for b in sl.blocks if b.kind == "fig" and os.path.exists(b.text)]
     if not figs:
         return []
-    desc = condense(" ".join(sl.notes)) if sl.notes else ""
-    if not desc:
-        key = next((b for b in sl.blocks if b.kind == "key"), None)
-        desc = key.text if key else ""
+    desc = figure_description(sl)      # shared with the PPTX back-end
 
     frames = []
     for b in figs:

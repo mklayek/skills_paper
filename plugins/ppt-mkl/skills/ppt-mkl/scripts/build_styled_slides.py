@@ -8,8 +8,13 @@ Renders the "lecture" slide style used for the cganac_v2_r1 methodology talk:
   * native, editable PowerPoint equations (OMML via pandoc) with a red `---(N)`
     equation tag placed on the same line, preserving the source numbering;
   * a bold takeaway line and a purple handwriting "Therefore, ..." line;
-  * bottom-anchored figure, thin page frame, and a date / label / page-number footer;
+  * thin page frame, and a date / label / page-number footer;
   * the source's discussion paragraph as the speaker note.
+
+Every !fig: gets its OWN slide carrying the parent slide's title: the image as large as
+the slide allows, its caption underneath, and one or two lines of description condensed
+from that slide's !note: (or !key:). Never shrink a figure so it can share a slide with
+the bullets — use --no-fig-slides only when inline figures are explicitly wanted.
 
 INPUT — strict line-prefix mini-language (see DECK_SPEC.md):
 
@@ -649,7 +654,7 @@ def rich_runs_title(text: str, size_pt: float, omml: dict[str, str]) -> tuple[st
 
 
 def build_content_slide(prs, sl: Slide, omml: dict[str, str], date_s: str,
-                        foot: str, page: int) -> None:
+                        foot: str, page: int, skip_figs: bool = False) -> None:
     slide = prs.slides.add_slide(prs.slide_layouts[6])   # blank
     add_frame(slide)
 
@@ -665,10 +670,13 @@ def build_content_slide(prs, sl: Slide, omml: dict[str, str], date_s: str,
     add_line(slide, RULE_Y + 0.035, C_RULE_ORANGE, 2.4)
 
     # --- body first: it decides how much room is left for the figure ------- #
-    figs = [b for b in sl.blocks if b.kind == "fig" and os.path.exists(b.text)]
+    figs = ([] if skip_figs else
+            [b for b in sl.blocks if b.kind == "fig" and os.path.exists(b.text)])
     for b in sl.blocks:
         if b.kind == "fig" and not os.path.exists(b.text):
             print(f"  WARN: missing figure {b.text}")
+    body_blocks = ([b for b in sl.blocks if b.kind != "fig"] if skip_figs
+                   else sl.blocks)
 
     usable_w = 13.333 - M_L - M_R - 0.40
     fig_cap = figs[0].tag if figs else ""
@@ -683,15 +691,15 @@ def build_content_slide(prs, sl: Slide, omml: dict[str, str], date_s: str,
     else:
         options = [0.0]
 
-    _HL_RESET[0] = any("==" in b.text for b in sl.blocks
+    _HL_RESET[0] = any("==" in b.text for b in body_blocks
                        if b.kind in ("bullet", "key", "so"))
     for fh in options:                      # give the figure its space, then fit the body
         avail = (FOOT_RULE_Y - 0.14 - fh - cap_h) - BODY_TOP
         scale = 1.0
-        xml, hgt, anchors = build_paragraphs(sl.blocks, omml, scale)
+        xml, hgt, anchors = build_paragraphs(body_blocks, omml, scale)
         while hgt > avail and scale > MIN_SCALE:
             scale = max(MIN_SCALE, scale - 0.04)
-            xml, hgt, anchors = build_paragraphs(sl.blocks, omml, scale)
+            xml, hgt, anchors = build_paragraphs(body_blocks, omml, scale)
         fig_h = fh
         if hgt <= avail:
             break
@@ -738,6 +746,90 @@ def build_content_slide(prs, sl: Slide, omml: dict[str, str], date_s: str,
 
     if sl.notes:
         slide.notes_slide.notes_text_frame.text = " ".join(sl.notes)
+
+
+def condense(text: str, max_words: int = 42) -> str:
+    """Trim a speaker note down to a one-or-two-line figure description."""
+    words = text.split()
+    if len(words) <= max_words:
+        return text.strip()
+    cut = " ".join(words[:max_words])
+    dot = max(cut.rfind(". "), cut.rfind("; "))
+    if dot > len(cut) * 0.5:
+        return cut[:dot + 1].strip()
+    return cut.rstrip(",;:") + " …"
+
+
+def figure_description(sl: Slide) -> str:
+    """The 1-2 line description printed under a figure on its own slide."""
+    if sl.notes:
+        return condense(" ".join(sl.notes))
+    key = next((b for b in sl.blocks if b.kind == "key"), None)
+    return key.text if key else ""
+
+
+def build_figure_slide(prs, sl: Slide, fig, omml: dict[str, str], date_s: str,
+                       foot: str, page: int) -> None:
+    """One figure, as large as the slide allows, with caption and description.
+
+    A figure squeezed under a full body of bullets ends up unreadable, so each
+    !fig: gets its own slide carrying the parent slide's title.
+    """
+    _HL_RESET[0] = False
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    add_frame(slide)
+
+    plain_len = len(re.sub(r"[*=$]", "", sl.title))
+    t_size = 30.0 if plain_len <= 52 else (26.0 if plain_len <= 66 else 23.0)
+    tb = slide.shapes.add_textbox(emu(M_L + 0.10), emu(TITLE_TOP),
+                                  emu(13.333 - M_L - M_R - 0.20), emu(TITLE_H))
+    set_txbody(tb, title_paragraph(sl.title, omml, t_size), anchor="ctr")
+    add_line(slide, RULE_Y, C_RULE_GREY, 0.9)
+    add_line(slide, RULE_Y + 0.035, C_RULE_ORANGE, 2.4)
+
+    desc = figure_description(sl)
+    cap = fig.tag or ""
+    # reserve room at the bottom: description first, caption sits just above it
+    desc_h = 0.0
+    if desc:
+        n_lines = 1 + len(desc) // 105
+        desc_h = 0.30 + 0.26 * min(n_lines, 3)
+    cap_h = 0.34 if cap else 0.0
+
+    usable_w = 13.333 - M_L - M_R - 0.40
+    top = BODY_TOP + 0.06
+    bottom = FOOT_RULE_Y - 0.12 - desc_h - cap_h
+    avail_h = max(1.5, bottom - top)
+
+    from PIL import Image
+    with Image.open(fig.text) as im:
+        iw, ih = im.size
+    w = min(usable_w, avail_h * iw / ih)
+    h = w * ih / iw
+    slide.shapes.add_picture(fig.text, emu((13.333 - w) / 2.0),
+                             emu(top + (avail_h - h) / 2.0), emu(w), emu(h))
+
+    y = bottom + 0.04
+    if cap:
+        cb = slide.shapes.add_textbox(emu(M_L + 0.16), emu(y),
+                                      emu(13.333 - M_L - M_R - 0.32), emu(cap_h))
+        cb.text_frame.word_wrap = True
+        set_txbody(cb,
+                   para('<a:pPr algn="ctr" marL="0" indent="0"><a:buNone/></a:pPr>',
+                        rich_runs(cap, 15.0, omml, italic=True)[0]),
+                   anchor="t", autofit=False)
+        y += cap_h
+    if desc:
+        db = slide.shapes.add_textbox(emu(M_L + 0.16), emu(y),
+                                      emu(13.333 - M_L - M_R - 0.32), emu(desc_h))
+        db.text_frame.word_wrap = True
+        set_txbody(db,
+                   para('<a:pPr algn="ctr" marL="0" indent="0"><a:buNone/></a:pPr>',
+                        rich_runs(desc, 16.0, omml)[0]),
+                   anchor="t", autofit=False)
+
+    add_line(slide, FOOT_RULE_Y, C_FRAME, 0.75)
+    add_footer(slide, date_s, foot, page)
 
 
 def build_section_slide(prs, sl: Slide, date_s: str, foot: str, page: int) -> None:
@@ -829,7 +921,12 @@ def main() -> None:
     ap.add_argument("--foot", default="")
     ap.add_argument("--no-date", action="store_true", help="omit the date from the footer")
     ap.add_argument("--no-page", action="store_true", help="omit the page number from the footer")
+    ap.add_argument("--fig-slides", dest="fig_slides", action="store_true", default=True,
+                    help="give every figure its own slide (default)")
+    ap.add_argument("--no-fig-slides", dest="fig_slides", action="store_false",
+                    help="keep figures inline under the bullets")
     args = ap.parse_args()
+    fig_slides = args.fig_slides
     _FOOTER_OPTS["no_date"] = args.no_date
     _FOOTER_OPTS["no_page"] = args.no_page
 
@@ -859,7 +956,15 @@ def main() -> None:
         elif sl.section:
             build_section_slide(prs, sl, args.date, args.foot, page)
         else:
-            build_content_slide(prs, sl, omml, args.date, args.foot, page)
+            build_content_slide(prs, sl, omml, args.date, args.foot, page,
+                                skip_figs=fig_slides)
+            page += 1
+            if fig_slides:
+                for fb in [b for b in sl.blocks
+                           if b.kind == "fig" and os.path.exists(b.text)]:
+                    build_figure_slide(prs, sl, fb, omml, args.date, args.foot, page)
+                    page += 1
+            continue
         page += 1
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     prs.save(args.out)
