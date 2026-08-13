@@ -151,12 +151,37 @@ GPRTransNet deck is 90 slides in each.
 `--no-fig-slides` on either script restores inline, bottom-anchored figures (and is implied
 by `--beamer-theme none`).
 
+## Filling the text area (Beamer)
+
+A half-empty slide next to a full one reads as a mistake. The themed Beamer build therefore
+**merges consecutive under-full slides of the same sub-topic** before rendering: where a
+slide's body uses less than roughly half the frame and the next slide shares its **title
+prefix** (`Attn`, `GRU`, `W2P`, …), the two become one — provided the combined body still
+fits a single frame. The joined title reads `PREFIX : topic one · topic two`, and reverts
+to the first topic alone if that would run too long.
+
+- Slides are only ever merged **within** a sub-topic and **never across** a `#` section.
+- Reference slides (`!ref:`) are never merged — they keep their fixed ~5-per-slide layout.
+- Figures are untouched: each still gets its own frame, and its description is **frozen onto
+  the figure** at merge time so two figures on a merged slide keep their own `!note:` text.
+- `--no-merge-slides` renders every slide exactly as written.
+
+Tuning lives in `deck_to_beamer.py`: `FRAME_LINES` (frame capacity) and `UNDERFULL_LINES`
+(the merge trigger), both measured in estimated rendered lines against the actual PDF.
+
+## The closing lines get their own markers
+
+`!key:` and `!so:` are conclusions, not more statements, so in themed Beamer they do **not**
+take the theme's bullet: `!key:` gets a green ✔ and `!so:` a purple ⇒. That keeps the
+takeaway visually separate from the body it summarises.
+
 | Flag | Default | Effect |
 |---|---|---|
 | `--beamer-theme` | `Madrid` | any beamer theme name; `none` = the old hand-built chrome |
 | `--beamer-colortheme` | `default` | beamer color theme |
 | `--author-short` | `M. K. Layek — CNU` | left cell of Madrid's footline |
 | `--fig-slides` / `--no-fig-slides` | on (both scripts) | one dedicated slide per figure vs. inline |
+| `--merge-slides` / `--no-merge-slides` | on when themed | fill the text area by merging under-full same-sub-topic slides |
 
 The PPTX back-end is unaffected — it keeps the underlined-title lecture style.
 
@@ -211,6 +236,8 @@ Chrome differs by back-end and that is intentional:
 | Bullets | black squares, flush left | Madrid shaded blue balls, nested |
 | Body font | Times New Roman | theme sans-serif (no `mathpazo`) |
 | Figures | own slide + description | own frame + description |
+| `!key:` / `!so:` | no marker | green ✔ / purple ⇒ |
+| Under-full slides | left as written | merged within a sub-topic |
 | Footer | date \| label \| page | short author \| label \| date + page |
 
 The **content** palette above is shared and must never drift between the two.

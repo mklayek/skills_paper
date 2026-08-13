@@ -60,6 +60,10 @@ title contains "Thank you".
 - **Give every figure slide a `!note:`.** Both back-ends print it, condensed to one or two
   lines, as the description under the figure on its dedicated slide. Without one they fall
   back to `!key:`, and with neither the figure ships bare.
+- **Keep the `PREFIX :` consistent across a run of related slides.** The themed Beamer build
+  merges consecutive under-full slides that share a prefix, so a consistent prefix is what
+  lets a thin slide be absorbed instead of shipping half-empty. Changing prefix marks the
+  boundary the merge will not cross.
 - If a source block needs more, SPLIT into two slides with `(1/2)` / `(2/2)` NOT in the title —
   instead give each half its own distinct topical title.
 - Bullet text ≤ ~22 words. Symbol-definition bullets are short: `$ symbol $ — meaning.`

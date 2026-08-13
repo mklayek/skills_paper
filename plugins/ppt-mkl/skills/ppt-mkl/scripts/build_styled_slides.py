@@ -123,6 +123,7 @@ class Block:
     level: int = 0
     tag: str = ""                 # equation number, e.g. "7"
     width: float = 0.55           # figure width fraction
+    desc: str = ""                # figure: description frozen at slide-merge time
 
 
 @dataclass

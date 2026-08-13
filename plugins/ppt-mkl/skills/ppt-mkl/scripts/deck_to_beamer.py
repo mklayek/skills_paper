@@ -19,6 +19,12 @@ its own frame under the same title at ~72% of the slide height, with its caption
 or two lines of description drawn from that slide's !note: (or !key:). Use
 --no-fig-slides to keep them inline.
 
+Themed mode also fills the text area: consecutive under-full slides that share a title
+prefix (the sub-topic) are merged into one frame while the combined body still fits, so
+no slide ships half empty. Reference slides are exempt; --no-merge-slides disables it.
+The closing !key: and !so: lines take their own markers (green check, purple double
+arrow) instead of the theme's bullet, keeping the takeaway distinct from the body.
+
 The Beamer back-end uses the **Madrid** theme by default (Madrid-default-default,
 https://deic.uab.cat/~iblanes/beamer_gallery/individual/Madrid-default-default.html):
 a blue frametitle bar, an infolines headline carrying the section name, and Madrid's
@@ -41,6 +47,7 @@ Resources Engineering, Chonnam National University, Gwangju, Republic of Korea.
 from __future__ import annotations
 
 import argparse
+import math
 import os
 import re
 import shutil
@@ -115,6 +122,19 @@ PREAMBLE = r"""
 \setbeamertemplate{navigation symbols}{}
 """
 
+# Themed-only chrome. The closing takeaway and the "Therefore, ..." line sit at the
+# bottom of the slide and are NOT ordinary statements, so they get their own markers,
+# deliberately different from the theme's bullets: a green check for the conclusion,
+# a purple double arrow for the consequence.
+PREAMBLE_THEMED_CHROME = r"""
+\newcommand{\mklkeymark}{{\color{mklcheck}\ding{52}}}
+\newcommand{\mklsomark}{{\color{mklso}$\Rightarrow$}}
+\renewcommand{\mklkey}[1]{\par\medskip\noindent\hangindent=1.5em
+  \mklkeymark~\textbf{#1}}
+\renewcommand{\mklso}[1]{\par\smallskip\noindent\hangindent=1.5em
+  \mklsomark~{\color{mklso}\itshape #1}}
+"""
+
 # Chrome for --beamer-theme none: the original hand-built title rule and footline.
 # A named theme (Madrid by default) supplies its own frametitle bar and footline,
 # so these overrides are emitted ONLY when no theme is in play.
@@ -183,6 +203,92 @@ def marker_level(b) -> int:
 # --------------------------------------------------------------------------- #
 # Emitters
 # --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# Filling the text area: merge consecutive under-full slides
+# --------------------------------------------------------------------------- #
+# Rough line budget of one themed 16:9 frame at 11pt, measured off the rendered
+# PDF: a body of ~22 estimated lines fills the text area before [shrink] engages.
+# UNDERFULL is the point below which a slide looks too empty to stand alone.
+FRAME_LINES = 21.0
+UNDERFULL_LINES = 12.0
+CPL = {0: 95, 1: 90, 2: 84}        # characters per rendered line, per bullet level
+
+
+def block_lines(b) -> float:
+    """Estimated rendered height of one block, in lines."""
+    if b.kind == "fig":
+        return 0.0                 # figures live on their own frame
+    if b.kind == "eq":
+        return 2.0
+    n = len(re.sub(r"[*=@$]", "", b.text))
+    if b.kind == "bullet":
+        return max(1.0, math.ceil(n / CPL.get(marker_level(b), 95)))
+    if b.kind == "key":
+        return max(1.0, math.ceil(n / 95)) + 0.4
+    if b.kind == "so":
+        return max(1.0, math.ceil(n / 95)) + 0.3
+    return max(1.0, math.ceil(n / 95))
+
+
+def slide_lines(sl) -> float:
+    return sum(block_lines(b) for b in sl.blocks)
+
+
+def title_prefix(title: str) -> str:
+    """`Attn : Scoring alignment` -> `Attn`. Slides sharing it are one sub-topic."""
+    return title.split(" : ", 1)[0].strip() if " : " in title else ""
+
+
+def title_topic(title: str) -> str:
+    return title.split(" : ", 1)[1].strip() if " : " in title else title.strip()
+
+
+def mergeable(sl) -> bool:
+    """Reference slides keep their fixed 5-per-slide layout; never merge them."""
+    if sl.section or getattr(sl, "fullbleed_img", None):
+        return False
+    return not any(b.kind == "ref" for b in sl.blocks)
+
+
+def merge_underfull(slides: list) -> list:
+    """Pull consecutive same-sub-topic slides together until the text area is full.
+
+    A slide whose body uses less than roughly half the frame looks broken next to
+    a full one. Where two adjacent slides share a title prefix (the sub-topic) and
+    their combined body still fits one frame, they become one slide.
+
+    Figures are unaffected — each still gets its own frame — but a figure's
+    description is frozen onto the block first, so a merged slide carrying two
+    figures does not print the same combined note under both.
+    """
+    out, merged = [], 0
+    for sl in slides:
+        prev = out[-1] if out else None
+        if (prev is not None and mergeable(prev) and mergeable(sl)
+                and title_prefix(prev.title)
+                and title_prefix(prev.title) == title_prefix(sl.title)
+                and slide_lines(prev) < UNDERFULL_LINES
+                and slide_lines(prev) + slide_lines(sl) <= FRAME_LINES):
+            for s in (prev, sl):                  # freeze each figure's own text
+                d = figure_description(s)
+                for b in s.blocks:
+                    if b.kind == "fig" and not b.desc:
+                        b.desc = d
+            prev.blocks = prev.blocks + sl.blocks
+            prev.notes = list(prev.notes) + list(sl.notes)
+            topics = f"{title_topic(prev.title)} · {title_topic(sl.title)}"
+            pfx = title_prefix(prev.title)
+            # keep the joined title only while it stays a readable one-liner
+            if len(re.sub(r"[*=]", "", topics)) <= 62:
+                prev.title = f"{pfx} : {topics}"
+            merged += 1
+            continue
+        out.append(sl)
+    if merged:
+        print(f"  merged under-full slides: {merged}")
+    return out
+
+
 def figure_frames_tex(sl, title: str) -> list:
     """One dedicated frame per figure: large image + caption + short description.
 
@@ -194,10 +300,11 @@ def figure_frames_tex(sl, title: str) -> list:
     figs = [b for b in sl.blocks if b.kind == "fig" and os.path.exists(b.text)]
     if not figs:
         return []
-    desc = figure_description(sl)      # shared with the PPTX back-end
+    slide_desc = figure_description(sl)      # shared with the PPTX back-end
 
     frames = []
     for b in figs:
+        desc = b.desc or slide_desc          # b.desc is set when slides were merged
         body = [r"\begin{frame}{" + tex_escape(title) + "}",
                 r"\vfill\begin{center}",
                 r"\includegraphics[width=0.92\textwidth,height=0.72\textheight,"
@@ -296,7 +403,7 @@ def build_tex(slides, args) -> str:
     if fig_slides is None:
         fig_slides = not plain
 
-    body = PREAMBLE + (PREAMBLE_PLAIN_CHROME if plain else "")
+    body = PREAMBLE + (PREAMBLE_PLAIN_CHROME if plain else PREAMBLE_THEMED_CHROME)
     pre = (body.replace("=RED=", "{" + C_RED + "}")
                    .replace("=TERM=", "{" + C_TERM + "}")
                    .replace("=CHECK=", "{" + C_CHECK + "}")
@@ -402,6 +509,12 @@ def main() -> None:
                     help="give every figure its own frame (default with a named theme)")
     ap.add_argument("--no-fig-slides", dest="fig_slides", action="store_false",
                     help="keep figures inline under the bullets")
+    ap.add_argument("--merge-slides", dest="merge_slides", action="store_true",
+                    default=None,
+                    help="merge consecutive under-full same-sub-topic slides "
+                         "so the text area fills (default with a named theme)")
+    ap.add_argument("--no-merge-slides", dest="merge_slides", action="store_false",
+                    help="keep every slide exactly as written in the deck")
     ap.add_argument("--no-date", action="store_true", help="omit the date from the footline")
     ap.add_argument("--no-page", action="store_true", help="omit the frame number from the footline")
     ap.add_argument("--md-only", action="store_true")
@@ -414,6 +527,11 @@ def main() -> None:
 
     slides = parse_deck(src)
     ensure_thankyou(slides)
+    themed = (args.beamer_theme or DEFAULT_THEME).strip().lower() not in (
+        "", "none", "default")
+    merge = args.merge_slides if args.merge_slides is not None else themed
+    if merge:
+        slides = merge_underfull(slides)
     print(f"deck_to_beamer: {src}\n  slides: {len(slides)}")
 
     md_path = os.path.join(out_dir, name + ".md")
