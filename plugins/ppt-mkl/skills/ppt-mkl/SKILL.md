@@ -153,21 +153,40 @@ by `--beamer-theme none`).
 
 ## Filling the text area (Beamer)
 
-A half-empty slide next to a full one reads as a mistake. The themed Beamer build therefore
-**merges consecutive under-full slides of the same sub-topic** before rendering: where a
-slide's body uses less than roughly half the frame and the next slide shares its **title
-prefix** (`Attn`, `GRU`, `W2P`, …), the two become one — provided the combined body still
-fits a single frame. The joined title reads `PREFIX : topic one · topic two`, and reverts
-to the first topic alone if that would run too long.
+A half-empty slide next to a full one reads as a mistake. Before rendering, the themed
+Beamer build **packs each frame's text area with content drawn forward from the next
+slide**, in two passes:
 
-- Slides are only ever merged **within** a sub-topic and **never across** a `#` section.
-- Reference slides (`!ref:`) are never merged — they keep their fixed ~5-per-slide layout.
+1. **Whole-slide merge** — while two adjacent slides' bodies together still fit one frame,
+   they become one slide.
+2. **Bullet pulling** — if a slide is still under `TARGET_FILL`, leading bullet groups are
+   lifted off the next slide one at a time until it fills. A group is one level-0 bullet
+   plus its sub-bullets, and the donor always keeps at least `MIN_DONOR_GROUPS` of its own.
+
+Pulled content is inserted **above** the `!key:` / `!so:` conclusion, never after it — the
+takeaway stays last. Only the donor's **leading run of bullets** is movable, so a bullet is
+never torn out from behind an equation or a takeaway it belongs to.
+
+**Titles are rewritten** to name both topics: `PREFIX : topic one · topic two`, or
+`PFX-A · PFX-B : …` when the sub-topics differ. A wrapping frametitle would steal back the
+body height just gained, so the second topic is shortened word by word to fit one line
+(never ending on a dangling `and` / `of` / `the`), prefixes are deduped, and at most two are
+ever shown.
+
+- Packing **never crosses a `#` section** — that boundary is the hard stop.
+- Reference slides (`!ref:`) are never packed — they keep their fixed ~5-per-slide layout.
 - Figures are untouched: each still gets its own frame, and its description is **frozen onto
-  the figure** at merge time so two figures on a merged slide keep their own `!note:` text.
+  the figure** before notes are combined, so two figures on one packed slide keep their own
+  `!note:` text.
 - `--no-merge-slides` renders every slide exactly as written.
 
-Tuning lives in `deck_to_beamer.py`: `FRAME_LINES` (frame capacity) and `UNDERFULL_LINES`
-(the merge trigger), both measured in estimated rendered lines against the actual PDF.
+Tuning constants in `deck_to_beamer.py`, all in estimated rendered lines and calibrated
+against the actual PDF: `FRAME_LINES` (capacity), `TARGET_FILL` (the point below which a
+slide pulls content forward), `MIN_DONOR_GROUPS`, and `TITLE_MAX`.
+
+> Some slides still end under-full — the last slide of a section has nothing it may borrow
+> from, and a neighbour that would overflow the frame is left alone. That is correct
+> behaviour, not a miss.
 
 ## The closing lines get their own markers
 
@@ -181,7 +200,7 @@ takeaway visually separate from the body it summarises.
 | `--beamer-colortheme` | `default` | beamer color theme |
 | `--author-short` | `M. K. Layek — CNU` | left cell of Madrid's footline |
 | `--fig-slides` / `--no-fig-slides` | on (both scripts) | one dedicated slide per figure vs. inline |
-| `--merge-slides` / `--no-merge-slides` | on when themed | fill the text area by merging under-full same-sub-topic slides |
+| `--merge-slides` / `--no-merge-slides` | on when themed | fill the text area by merging slides and pulling bullets forward |
 
 The PPTX back-end is unaffected — it keeps the underlined-title lecture style.
 
@@ -237,7 +256,7 @@ Chrome differs by back-end and that is intentional:
 | Body font | Times New Roman | theme sans-serif (no `mathpazo`) |
 | Figures | own slide + description | own frame + description |
 | `!key:` / `!so:` | no marker | green ✔ / purple ⇒ |
-| Under-full slides | left as written | merged within a sub-topic |
+| Under-full slides | left as written | packed from the next slide |
 | Footer | date \| label \| page | short author \| label \| date + page |
 
 The **content** palette above is shared and must never drift between the two.

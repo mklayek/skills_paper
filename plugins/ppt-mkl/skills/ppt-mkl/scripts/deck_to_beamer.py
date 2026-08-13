@@ -19,9 +19,11 @@ its own frame under the same title at ~72% of the slide height, with its caption
 or two lines of description drawn from that slide's !note: (or !key:). Use
 --no-fig-slides to keep them inline.
 
-Themed mode also fills the text area: consecutive under-full slides that share a title
-prefix (the sub-topic) are merged into one frame while the combined body still fits, so
-no slide ships half empty. Reference slides are exempt; --no-merge-slides disables it.
+Themed mode also fills the text area, drawing content forward from the next slide: whole
+slides are merged while their combined body fits a frame, then leading bullet groups are
+pulled off the following slide until the frame is full. Pulled content lands above the
+!key:/!so: conclusion, packing never crosses a # section, and titles are rewritten to
+name both topics. Reference slides are exempt; --no-merge-slides disables it.
 The closing !key: and !so: lines take their own markers (green check, purple double
 arrow) instead of the theme's bullet, keeping the takeaway distinct from the body.
 
@@ -206,11 +208,15 @@ def marker_level(b) -> int:
 # --------------------------------------------------------------------------- #
 # Filling the text area: merge consecutive under-full slides
 # --------------------------------------------------------------------------- #
-# Rough line budget of one themed 16:9 frame at 11pt, measured off the rendered
-# PDF: a body of ~22 estimated lines fills the text area before [shrink] engages.
-# UNDERFULL is the point below which a slide looks too empty to stand alone.
-FRAME_LINES = 21.0
-UNDERFULL_LINES = 12.0
+# Line budget of one themed 16:9 frame at 11pt, calibrated against the rendered
+# PDF: a body measuring ~13.7 units filled 47 % of the text area, so a full frame
+# is ~29 units. FRAME_LINES leaves a little headroom under that.
+FRAME_LINES = 28.0
+# Below this a slide is left with visible white space, so it tries to draw content
+# forward from the next slide.
+TARGET_FILL = 22.5
+# A donor slide must keep at least this many top-level bullet groups of its own.
+MIN_DONOR_GROUPS = 2
 CPL = {0: 95, 1: 90, 2: 84}        # characters per rendered line, per bullet level
 
 
@@ -250,42 +256,133 @@ def mergeable(sl) -> bool:
     return not any(b.kind == "ref" for b in sl.blocks)
 
 
-def merge_underfull(slides: list) -> list:
-    """Pull consecutive same-sub-topic slides together until the text area is full.
+TITLE_MAX = 72          # visible chars that still fit one frametitle line
+TITLE_STOP = {"and", "or", "the", "a", "an", "of", "in", "on", "for", "to",
+              "with", "from", "as", "at", "by", "its", "their", "—", "-"}
 
-    A slide whose body uses less than roughly half the frame looks broken next to
-    a full one. Where two adjacent slides share a title prefix (the sub-topic) and
-    their combined body still fits one frame, they become one slide.
 
-    Figures are unaffected — each still gets its own frame — but a figure's
-    description is frozen onto the block first, so a merged slide carrying two
-    figures does not print the same combined note under both.
+def vislen(s: str) -> int:
+    return len(re.sub(r"[*=]", "", s))
+
+
+def joined_title(a: str, b: str) -> str:
+    """Title for a slide that now carries content from two source slides.
+
+    A frametitle that wraps steals body height, which defeats the whole point of
+    filling the slide — so the second topic is shortened word by word rather than
+    dropped outright, and only abandoned when even three words will not fit.
     """
-    out, merged = [], 0
-    for sl in slides:
+    pa, pb, ta, tb = title_prefix(a), title_prefix(b), title_topic(a), title_topic(b)
+    if not (pa and pb):
+        return a if vislen(f"{a} · {b}") > TITLE_MAX else f"{a} · {b}"
+    # `a` may already be a joined title, so its prefix can carry several names;
+    # dedupe and keep at most two so repeated merges cannot pile them up.
+    names = []
+    for p in pa.split(" · ") + [pb]:
+        if p not in names:
+            names.append(p)
+    head = f"{' · '.join(names[:2])} : {ta}"
+    words = tb.split()
+    while words:
+        cand = f"{head} · {' '.join(words)}"
+        if vislen(cand) <= TITLE_MAX:
+            # a truncated topic must not end on a dangling connector or article
+            while words and words[-1].lower().strip("*=,;:") in TITLE_STOP:
+                words = words[:-1]
+                if len(words) < 2:
+                    return head
+                cand = f"{head} · {' '.join(words)}"
+            return cand.rstrip(" —-·,;:")
+        if len(words) <= 3:
+            break
+        words = words[:-1]
+    return head
+
+
+def freeze_fig_desc(sl) -> None:
+    """Pin each figure's description before its slide's notes get combined."""
+    d = figure_description(sl)
+    for b in sl.blocks:
+        if b.kind == "fig" and not b.desc:
+            b.desc = d
+
+
+def bullet_groups(blocks: list) -> list:
+    """Leading run of bullets, grouped as one level-0 bullet plus its sub-bullets.
+
+    Only this leading run is movable: pulling a bullet out from behind an equation
+    or a takeaway would tear it away from what it explains.
+    """
+    groups, cur = [], []
+    for b in blocks:
+        if b.kind != "bullet":
+            break
+        if b.level == 0 and cur:
+            groups.append(cur)
+            cur = []
+        cur.append(b)
+    if cur:
+        groups.append(cur)
+    return groups
+
+
+def insert_before_closing(sl, blocks: list) -> None:
+    """Body content goes above the !key:/!so: conclusion, never after it."""
+    idx = next((i for i, b in enumerate(sl.blocks) if b.kind in ("key", "so")),
+               len(sl.blocks))
+    sl.blocks[idx:idx] = blocks
+
+
+def pack_slides(slides: list) -> list:
+    """Fill each frame's text area, drawing content forward from the next slide.
+
+    Two passes per slide, both stopping at a `#` section boundary and skipping
+    reference slides (which keep their fixed ~5-per-slide layout):
+
+    1. whole-slide merge while the combined body still fits one frame;
+    2. if the slide is still under-full, pull leading bullet groups off the next
+       slide one at a time, leaving it at least MIN_DONOR_GROUPS of its own.
+
+    Titles are rewritten to name both topics whenever content is combined.
+    """
+    out, merged, pulled = [], 0, 0
+    queue = list(slides)
+    while queue:
+        sl = queue.pop(0)
         prev = out[-1] if out else None
         if (prev is not None and mergeable(prev) and mergeable(sl)
-                and title_prefix(prev.title)
-                and title_prefix(prev.title) == title_prefix(sl.title)
-                and slide_lines(prev) < UNDERFULL_LINES
                 and slide_lines(prev) + slide_lines(sl) <= FRAME_LINES):
-            for s in (prev, sl):                  # freeze each figure's own text
-                d = figure_description(s)
-                for b in s.blocks:
-                    if b.kind == "fig" and not b.desc:
-                        b.desc = d
+            freeze_fig_desc(prev)
+            freeze_fig_desc(sl)
+            prev.title = joined_title(prev.title, sl.title)
             prev.blocks = prev.blocks + sl.blocks
             prev.notes = list(prev.notes) + list(sl.notes)
-            topics = f"{title_topic(prev.title)} · {title_topic(sl.title)}"
-            pfx = title_prefix(prev.title)
-            # keep the joined title only while it stays a readable one-liner
-            if len(re.sub(r"[*=]", "", topics)) <= 62:
-                prev.title = f"{pfx} : {topics}"
             merged += 1
             continue
+
+        # pass 2 — top up the slide already placed, from the one about to be placed
+        if (prev is not None and mergeable(prev) and mergeable(sl)
+                and slide_lines(prev) < TARGET_FILL):
+            took = []
+            groups = bullet_groups(sl.blocks)
+            while (len(groups) - len(took)) > MIN_DONOR_GROUPS:
+                g = groups[len(took)]
+                cost = sum(block_lines(b) for b in g)
+                if slide_lines(prev) + cost > FRAME_LINES:
+                    break
+                insert_before_closing(prev, g)
+                took.append(g)
+                if slide_lines(prev) >= TARGET_FILL:
+                    break
+            if took:
+                moved = [b for g in took for b in g]
+                sl.blocks = [b for b in sl.blocks if b not in moved]
+                prev.title = joined_title(prev.title, sl.title)
+                pulled += len(took)
         out.append(sl)
-    if merged:
-        print(f"  merged under-full slides: {merged}")
+    if merged or pulled:
+        print(f"  filled text area: {merged} slides merged, "
+              f"{pulled} bullet groups pulled forward")
     return out
 
 
@@ -531,7 +628,7 @@ def main() -> None:
         "", "none", "default")
     merge = args.merge_slides if args.merge_slides is not None else themed
     if merge:
-        slides = merge_underfull(slides)
+        slides = pack_slides(slides)
     print(f"deck_to_beamer: {src}\n  slides: {len(slides)}")
 
     md_path = os.path.join(out_dir, name + ".md")
