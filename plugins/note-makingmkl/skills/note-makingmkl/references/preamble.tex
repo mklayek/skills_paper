@@ -1,0 +1,83 @@
+% ============================================================================
+%  Reusable preamble for tight, black-&-white LaTeX teaching-notes PDFs.
+%  Copy this into your main.tex (or \input it). Set \figpath to your figures dir.
+%  Design goals: regular tex-to-pdf look, B&W, information-dense, page numbers,
+%  bounded (unbreakable) KEY POINT / NOTE / RESULT / DEFINITION boxes.
+% ============================================================================
+\documentclass[11pt]{article}
+
+% ---------- fonts & encoding ----------
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{amsmath,amssymb}
+\usepackage{microtype}
+
+% ---------- tight, information-dense page ----------
+\usepackage[a4paper,margin=2.0cm,headsep=8pt,footskip=20pt]{geometry}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt minus 1pt}
+\linespread{1.02}
+
+% ---------- graphics, tables, lists ----------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{ragged2e}
+\usepackage[inline]{enumitem}
+\setlist{nosep,leftmargin=1.5em,topsep=2pt,itemsep=2pt}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\usepackage{float}          % provides [H] so large figures/tables stay in-flow
+
+% tighter tables everywhere
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.06}
+
+% ---------- black & white palette (colour names resolve to black) ----------
+\usepackage{xcolor}
+\definecolor{navy}{gray}{0}\definecolor{teal}{gray}{0}
+\definecolor{dgreen}{gray}{0}\definecolor{dred}{gray}{0}\definecolor{ochre}{gray}{0}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc}
+
+% ---------- compact, black section headings ----------
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{9pt plus 1pt minus 1pt}{3pt}
+\titlespacing*{\subsection}{0pt}{6pt plus 1pt minus 1pt}{2pt}
+
+% ---------- header / footer with page numbers on every page ----------
+\usepackage{fancyhdr}
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\small\itshape \runningtitle}   % define \runningtitle before \begin{document}
+\fancyhead[R]{\small\leftmark}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\sectionmark}[1]{\markboth{\thesection.\ #1}{}}
+
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+% ============ teaching boxes: black & white, bounded, UNBREAKABLE ============
+% Unbreakable so a box never splits across a page (title + one orphan line).
+% If it doesn't fit, it moves whole to the next page.
+\tcbset{bwbox/.style={enhanced,colback=white,colframe=black,
+  colbacktitle=black!10,coltitle=black,boxrule=0.6pt,titlerule=0pt,
+  left=6pt,right=6pt,top=3pt,bottom=3pt,toptitle=1.5pt,bottomtitle=1.5pt,
+  arc=1pt,fonttitle=\bfseries\footnotesize,before skip=6pt,after skip=6pt}}
+\newtcolorbox{keynote}[1][]{bwbox,title={KEY POINT},#1}      % important takeaway
+\newtcolorbox{notebox}[1][]{bwbox,title={NOTE},#1}           % side aid / derivation note
+\newtcolorbox{resultbox}[1][]{bwbox,boxrule=1.1pt,title={RESULT \& MEANING},#1} % final result
+\newtcolorbox{defbox}[1][]{bwbox,title={DEFINITION},#1}      % boxed definition
+\newtcolorbox{oneline}{enhanced,colback=black!5,colframe=black,boxrule=0.6pt,
+  left=6pt,right=6pt,top=3pt,bottom=3pt,arc=1pt}            % one-line "in a nutshell"
+
+% set these per document, before \begin{document}:
+% \newcommand{\figpath}{/abs/path/to/figs}
+% \newcommand{\runningtitle}{Short Running Title}
