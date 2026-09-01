@@ -27,6 +27,7 @@ manuscripts never get fabricated results.
 | **`ppt-mkl`** | `ppt-mkl` | Build a research presentation from a paper/methods section: one plain-text deck source renders to **PPTX** (native editable equations), **Beamer PDF**, **.tex** and **.md** in a consistent lecture style (underlined titles, checkbox/star bullets, source equation numbers, figure slides). |
 | **`doc-tools`** | `doc-readermkl`, `documentation-agent`, `md-updater`, `methods-read-doc` | Read, maintain, update, and **explain** project/research docs (.md/.txt/.pdf/.doc/.xls); `methods-read-doc` builds beginner-accessible math/methods "read" explainers — per-symbol glossaries, boxed definitions, TikZ schematics **and ray/physics diagrams** (e.g. GPR acquisition geometry → hyperbola → polarity), plus full self-contained **`Fig. N.`** captions (hanging-indent, 3 pt below body, one preamble macro) — with matching PDF/DOCX. |
 | **`note-makingmkl`** | `note-makingmkl` | Turn source study/teaching material (Word **.docx**, Markdown, PDF, scanned pages) into a **tight, black-and-white LaTeX → PDF teaching-notes** document: reorganised into a clean **section/subsection** hierarchy, with bounded **KEY POINT / NOTE / RESULT / DEFINITION** boxes, wrapping `tabularx` tables, **in-flow (`[H]`) figures**, page numbers and native equations. Improves low-res images (re-typesets scanned tables and equation crops), then runs a **completeness audit** against the source. Ships a reusable B&W `preamble.tex`, authoring rules and a pandoc extraction script. |
+| **`ppt-to-pptx`** | `ppt-to-pptx-restyle` | **Restyle / rebuild an existing PowerPoint** (`.pptx`) into the clean MKL lecture style as a **slide-for-slide mirror** — keep the exact text and figures, **transcribe screenshot equations/definitions into real editable text and native equations**, keep genuine diagrams, and render a styled **PPTX + Beamer PDF** via `ppt-mkl`. Ships `extract_pptx.py` (verbatim text + per-slide images via slide rels), `build_mirror_deck.py` (per-slide deck with auto-montaged figures) and `sanitize_deck.py` (LaTeX-safe paths/characters). |
 
 ---
 
@@ -46,6 +47,7 @@ skills_paper/
     ├── compose-plan/     .claude-plugin/plugin.json + skills/compose-plan/SKILL.md
     ├── paper-reviewer/   .claude-plugin/plugin.json + skills/review/SKILL.md
     ├── ppt-mkl/          .claude-plugin/plugin.json + skills/ppt-mkl/SKILL.md + DECK_SPEC.md + template.deck + scripts/
+    ├── ppt-to-pptx/      .claude-plugin/plugin.json + skills/ppt-to-pptx-restyle/SKILL.md + scripts/(extract_pptx.py, build_mirror_deck.py, sanitize_deck.py)
     ├── doc-tools/        .claude-plugin/plugin.json + skills/{doc-readermkl,documentation-agent,md-updater,methods-read-doc}/SKILL.md
     └── note-makingmkl/   .claude-plugin/plugin.json + skills/note-makingmkl/SKILL.md + references/(preamble.tex, authoring_rules.md) + scripts/extract_source.sh
 ```
