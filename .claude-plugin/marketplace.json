@@ -89,7 +89,7 @@
     },
     {
       "name": "ppt-to-pptx",
-      "description": "Restyle/rebuild an existing PowerPoint (.pptx) into the clean MKL lecture style as a slide-for-slide mirror: keep the exact text and figures, transcribe screenshot equations/definitions into real editable text and native equations, and render a styled PPTX + Beamer PDF via ppt-mkl. Skills: `ppt-to-pptx-restyle`.",
+      "description": "Restyle/rebuild an existing PowerPoint (.pptx) into a clean styled deck (slide-for-slide, nothing left behind). Mode A: MKL lecture style with native OMML equations via ppt-mkl. Mode B: source-format-preserving — keep exact source fonts/sizes/word-colours, change only the layout (two-column: text left, figures right), re-author text screenshots as real runs, rebuild tables natively, verify with check-agents. Skills: `ppt-to-pptx-restyle`.",
       "source": "./plugins/ppt-to-pptx",
       "author": {
         "name": "Mrinal Kanti Layek"
