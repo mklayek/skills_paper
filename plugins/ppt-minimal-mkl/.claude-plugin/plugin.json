@@ -1,0 +1,19 @@
+{
+  "name": "ppt-minimal-mkl",
+  "description": "Build a minimal, white, classroom-ready .pptx teaching deck from any source (PDF, Markdown, HTML, text, Word, web pages or a topic to research): section dividers with generated pattern backgrounds, detailed bullets, numbered equations with per-symbol glosses, comparison tables and a US-English QA pass. Skills: `ppt-minimal-mkl`.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": [
+    "presentation",
+    "slides",
+    "pptx",
+    "teaching",
+    "lecture",
+    "pptxgenjs",
+    "equations",
+    "geophysics"
+  ]
+}

@@ -79,6 +79,15 @@
       "category": "presentation"
     },
     {
+      "name": "ppt-minimal-mkl",
+      "description": "Build a minimal, white, classroom-ready .pptx teaching deck from any source (PDF, Markdown, HTML, text, Word, web pages or a topic to research): pattern-backed section dividers, detailed bullets, numbered equations with per-symbol glosses, comparison tables and a US-English QA pass. Skills: `ppt-minimal-mkl`.",
+      "source": "./plugins/ppt-minimal-mkl",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "presentation"
+    },
+    {
       "name": "note-makingmkl",
       "description": "Turn source notes (Word .docx, Markdown, PDF, scanned pages) into a tight, black-and-white LaTeX -> PDF teaching-notes document: clean section/subsection hierarchy, bounded KEY POINT / NOTE / RESULT / DEFINITION boxes, wrapping tables, in-flow figures, page numbers, native equations, and a completeness audit. Skills: `note-makingmkl`.",
       "source": "./plugins/note-makingmkl",
