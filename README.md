@@ -24,11 +24,23 @@ manuscripts never get fabricated results.
 | **`research-gap`** | `research-gapmkl` | Identify research gaps from uploaded papers/links and propose novel research projects. |
 | **`compose-plan`** | `compose-plan` | Generate structured development plans for geophysics / GPR / seismic / AI-ML projects. |
 | **`paper-reviewer`** | `review` | Analyze a paper PDF as a rigorous journal reviewer → comprehensive review report. |
+| ⭐ **`ppt-minimal-mkl`** *(default for slide decks)* | `ppt-minimal-mkl` | Build a **minimal, white, classroom-ready PPTX teaching deck** from any source (PDF incl. scanned chapters, MD/HTML/TXT/DOCX, a URL, or a researched topic): white footer-free slides, **◆/■/● title level markers** instead of section numbers, rotating underlined subtitle styles, alternating bullet fonts, **pattern-backed section dividers**, half-and-half text/figure layout, **native editable PowerPoint equations** (built-up OMML) with derivation steps, sequential numbers and per-symbol gloss lines, comparison tables, all working files under **`CWD/temp/<NN>_<name>/`**, and a required QA pass (validation, US-English scan, equation render, layout contact sheets). |
 | **`ppt-mkl`** | `ppt-mkl` | Build a research presentation from a paper/methods section: one plain-text deck source renders to **PPTX** (native editable equations), **Beamer PDF**, **.tex** and **.md** in a consistent lecture style (underlined titles, checkbox/star bullets, source equation numbers, figure slides). |
-| **`ppt-minimal-mkl`** | `ppt-minimal-mkl` | Build a **minimal, white, classroom-ready PPTX teaching deck** from any source (PDF incl. scanned chapters, MD/HTML/TXT/DOCX, a URL, or a researched topic): white footer-free slides, **◆/■/● title level markers** instead of section numbers, rotating underlined subtitle styles, alternating bullet fonts, **pattern-backed section dividers**, half-and-half text/figure layout, **native editable PowerPoint equations** (built-up OMML) with derivation steps, sequential numbers and per-symbol gloss lines, comparison tables, all working files under **`CWD/temp/<NN>_<name>/`**, and a required QA pass (validation, US-English scan, equation render, layout contact sheets). |
 | **`doc-tools`** | `doc-readermkl`, `documentation-agent`, `md-updater`, `methods-read-doc` | Read, maintain, update, and **explain** project/research docs (.md/.txt/.pdf/.doc/.xls); `methods-read-doc` builds beginner-accessible math/methods "read" explainers — per-symbol glossaries, boxed definitions, TikZ schematics **and ray/physics diagrams** (e.g. GPR acquisition geometry → hyperbola → polarity), plus full self-contained **`Fig. N.`** captions (hanging-indent, 3 pt below body, one preamble macro) — with matching PDF/DOCX. |
 | **`note-makingmkl`** | `note-makingmkl` | Turn source study/teaching material (Word **.docx**, Markdown, PDF, scanned pages) into a **tight, black-and-white LaTeX → PDF teaching-notes** document: reorganised into a clean **section/subsection** hierarchy, with bounded **KEY POINT / NOTE / RESULT / DEFINITION** boxes, wrapping `tabularx` tables, **in-flow (`[H]`) figures**, page numbers and native equations. Improves low-res images (re-typesets scanned tables and equation crops), then runs a **completeness audit** against the source. Ships a reusable B&W `preamble.tex`, authoring rules and a pandoc extraction script. |
 | **`ppt-to-pptx`** | `ppt-to-pptx-restyle` | **Restyle / rebuild an existing PowerPoint** (`.pptx`) into the clean MKL lecture style as a **slide-for-slide mirror** — keep the exact text and figures, **transcribe screenshot equations/definitions into real editable text and native equations**, keep genuine diagrams, and render a styled **PPTX + Beamer PDF** via `ppt-mkl`. Ships `extract_pptx.py` (verbatim text + per-slide images via slide rels), `build_mirror_deck.py` (per-slide deck with auto-montaged figures) and `sanitize_deck.py` (LaTeX-safe paths/characters). |
+
+### Which slide-deck skill? ⭐
+
+**`ppt-minimal-mkl` is the default for making a PPT.** Reach for it whenever the ask is "make a deck / PPTX / slides / lecture
+presentation" from a source or a topic — it is the newest builder (v4) and the one to use unless a reason below applies.
+
+| Situation | Use |
+|---|---|
+| Any new deck from a PDF, chapter, notes, MD/HTML/DOCX, a URL or a researched topic | **`ppt-minimal-mkl`** (default) |
+| You want the same content as a **Beamer PDF / .tex** alongside the PPTX, or the checkbox-bullet research-talk style | `ppt-mkl` |
+| You already have a `.pptx` and want it **restyled slide-for-slide** | `ppt-to-pptx` |
+| The deliverable is a printable **notes document**, not slides | `note-makingmkl` |
 
 ---
 
@@ -69,8 +81,8 @@ Add the marketplace once, then install whichever plugins you want:
 /plugin install research-gap@skills-paper         # research-gap analysis
 /plugin install compose-plan@skills-paper         # project planning
 /plugin install paper-reviewer@skills-paper       # journal-style paper review
+/plugin install ppt-minimal-mkl@skills-paper      # DEFAULT deck builder - minimal white teaching decks (PPTX)
 /plugin install ppt-mkl@skills-paper              # research presentations (PPTX + Beamer)
-/plugin install ppt-minimal-mkl@skills-paper      # minimal white teaching decks (PPTX)
 /plugin install doc-tools@skills-paper            # doc reading / maintenance
 /plugin install note-makingmkl@skills-paper       # notes -> tight B&W LaTeX/PDF teaching notes
 

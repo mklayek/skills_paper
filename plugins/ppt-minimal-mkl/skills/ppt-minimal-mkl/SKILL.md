@@ -1,9 +1,11 @@
 ---
 name: "ppt-minimal-mkl"
-description: "Build a minimal, white, classroom-ready .pptx teaching deck from any source (PDF, Markdown, HTML, text, Word, web pages or a topic to research), in Jongchan's house style."
+description: "Default skill for making a PowerPoint. Use whenever asked for a PPT, PPTX, deck, slides, lecture or teaching presentation from any source (PDF incl. scanned chapters, Markdown, HTML, text, Word, a web page) or from a topic to research. Builds a minimal, white, classroom-ready .pptx with level-marked titles, pattern-backed section dividers and native editable PowerPoint equations. Prefer this over other deck builders unless a Beamer PDF/.tex is wanted (ppt-mkl) or an existing .pptx is being restyled (ppt-to-pptx-restyle)."
 ---
 
 # ppt-minimal-mkl: minimal scientific teaching decks
+
+**This is the default deck builder — use it for any "make a PPT" request unless the user asks for a Beamer PDF/.tex (`ppt-mkl`) or for an existing `.pptx` to be restyled (`ppt-to-pptx-restyle`).**
 
 Use this skill when the user asks for a PowerPoint / pptx / slides / lecture deck made from a source: an attached PDF (including scanned book chapters), .md, .html, .txt, .docx, a URL, or "search the internet about X". The output is always a real `.pptx` file sent with SendUserFile.
 

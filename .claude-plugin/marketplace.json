@@ -80,7 +80,7 @@
     },
     {
       "name": "ppt-minimal-mkl",
-      "description": "Build a minimal, white, classroom-ready .pptx teaching deck from any source (PDF, Markdown, HTML, text, Word, web pages or a topic to research): level-marked titles, pattern-backed section dividers, native editable PowerPoint equations with derivation steps and per-symbol glosses, comparison tables, all working files under CWD/temp/, and a US-English QA pass. Skills: `ppt-minimal-mkl`.",
+      "description": "Default deck builder. Build a minimal, white, classroom-ready .pptx teaching deck from any source (PDF, Markdown, HTML, text, Word, web pages or a topic to research): level-marked titles, pattern-backed section dividers, native editable PowerPoint equations with derivation steps and per-symbol glosses, comparison tables, all working files under CWD/temp/, and a US-English QA pass. Skills: `ppt-minimal-mkl`.",
       "source": "./plugins/ppt-minimal-mkl",
       "author": {
         "name": "Mrinal Kanti Layek"
