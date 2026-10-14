@@ -79,8 +79,17 @@
       "category": "presentation"
     },
     {
+      "name": "ppt-minimal-skill-v5",
+      "description": "DEFAULT deck builder (v5, replaces ppt-minimal-mkl v4): minimal white teaching decks with no numbers or footers, every source equation and figure, LHS/RHS-colored native equations, section-name titles with '(continued)', per-section title fonts, archive-first, and a tested build chain. Skills: `ppt-minimal-skill-v5`.",
+      "source": "./plugins/ppt-minimal-skill-v5",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "presentation"
+    },
+    {
       "name": "ppt-minimal-mkl",
-      "description": "Default deck builder. Build a minimal, white, classroom-ready .pptx teaching deck from any source (PDF, Markdown, HTML, text, Word, web pages or a topic to research): level-marked titles, pattern-backed section dividers, native editable PowerPoint equations with derivation steps and per-symbol glosses, comparison tables, all working files under CWD/temp/, and a US-English QA pass. Skills: `ppt-minimal-mkl`.",
+      "description": "Superseded by ppt-minimal-skill-v5 (the default deck builder). v4: minimal white teaching decks with level-marked titles, pattern dividers and native editable equations. Skills: `ppt-minimal-mkl`.",
       "source": "./plugins/ppt-minimal-mkl",
       "author": {
         "name": "Mrinal Kanti Layek"

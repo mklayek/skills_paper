@@ -1,0 +1,10 @@
+{
+  "name": "ppt-minimal-skill-v5",
+  "description": "DEFAULT deck builder (replaces ppt-minimal-mkl v4). Minimal white classroom-ready .pptx teaching decks from any source: no equation/figure/page/section numbers or footers, every source equation and figure included with derivations and enriched bullets, native editable equations with LHS/RHS colors alternating per equation, 22 pt body, subtitles only where a definition starts, source section names as titles with '(continued)', a title font and color per section, archive-first, Markdown copy, and a tested build chain (pptxgenjs + python-pptx + pandoc OMML) with coverage and layout checks. Skills: `ppt-minimal-skill-v5`.",
+  "version": "5.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": ["presentation", "slides", "pptx", "teaching", "lecture", "pptxgenjs", "equations", "omml", "geophysics"]
+}
