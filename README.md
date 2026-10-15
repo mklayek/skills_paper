@@ -29,6 +29,7 @@ manuscripts never get fabricated results.
 | **`ppt-mkl`** | `ppt-mkl` | Build a research presentation from a paper/methods section: one plain-text deck source renders to **PPTX** (native editable equations), **Beamer PDF**, **.tex** and **.md** in a consistent lecture style (underlined titles, checkbox/star bullets, source equation numbers, figure slides). |
 | **`doc-tools`** | `doc-readermkl`, `documentation-agent`, `md-updater`, `methods-read-doc` | Read, maintain, update, and **explain** project/research docs (.md/.txt/.pdf/.doc/.xls); `methods-read-doc` builds beginner-accessible math/methods "read" explainers — per-symbol glossaries, boxed definitions, TikZ schematics **and ray/physics diagrams** (e.g. GPR acquisition geometry → hyperbola → polarity), plus full self-contained **`Fig. N.`** captions (hanging-indent, 3 pt below body, one preamble macro) — with matching PDF/DOCX. |
 | **`note-makingmkl`** | `note-makingmkl` | Turn source study/teaching material (Word **.docx**, Markdown, PDF, scanned pages) into a **tight, black-and-white LaTeX → PDF teaching-notes** document: reorganised into a clean **section/subsection** hierarchy, with bounded **KEY POINT / NOTE / RESULT / DEFINITION** boxes, wrapping `tabularx` tables, **in-flow (`[H]`) figures**, page numbers and native equations. Improves low-res images (re-typesets scanned tables and equation crops), then runs a **completeness audit** against the source. Ships a reusable B&W `preamble.tex`, authoring rules and a pandoc extraction script. |
+| **`tex-notes-mkl`** | `tex-notes-mkl` | Build **short, simplified two-column LaTeX → PDF lecture notes** (11 pt, A4, Times, 2–4 pages or the user's page limit) that explain **what a source's equations mean and why they matter**: every source equation with its number (chapter prefix dropped, e.g. (8.38) → (38)), **"Reading the equation"** bullets on the physical meaning of each term, limiting cases, practical use on field data, algebra **verified numerically in Python**, 1–3 **matplotlib figures computed from the equations**, a small numbers table, a `booktabs` summary table, a green **key-message box** and a navy **"in plain words"** closing box. Ships the preamble template, page-limit fitting steps and a required QA pass (log, page count, contact sheet, US-English scan). Delivers the **PDF + .tex**. |
 | **`ppt-to-pptx`** | `ppt-to-pptx-restyle` | **Restyle / rebuild an existing PowerPoint** (`.pptx`) into the clean MKL lecture style as a **slide-for-slide mirror** — keep the exact text and figures, **transcribe screenshot equations/definitions into real editable text and native equations**, keep genuine diagrams, and render a styled **PPTX + Beamer PDF** via `ppt-mkl`. Ships `extract_pptx.py` (verbatim text + per-slide images via slide rels), `build_mirror_deck.py` (per-slide deck with auto-montaged figures) and `sanitize_deck.py` (LaTeX-safe paths/characters). |
 
 ### Which slide-deck skill? ⭐
@@ -43,6 +44,7 @@ presentation" from a source or a topic. It is the newest builder (v5) and the on
 | You want the same content as a **Beamer PDF / .tex** alongside the PPTX, or the checkbox-bullet research-talk style | `ppt-mkl` |
 | You already have a `.pptx` and want it **restyled slide-for-slide** | `ppt-to-pptx` |
 | The deliverable is a printable **notes document**, not slides | `note-makingmkl` |
+| Short **two-column notes explaining the significance of equations** (with computed figures, a page limit) | `tex-notes-mkl` |
 
 ---
 
@@ -66,7 +68,8 @@ skills_paper/
     ├── ppt-minimal-mkl/  .claude-plugin/plugin.json + skills/ppt-minimal-mkl/SKILL.md   (v4, superseded)
     ├── ppt-to-pptx/      .claude-plugin/plugin.json + skills/ppt-to-pptx-restyle/SKILL.md + scripts/(extract_pptx.py, build_mirror_deck.py, sanitize_deck.py)
     ├── doc-tools/        .claude-plugin/plugin.json + skills/{doc-readermkl,documentation-agent,md-updater,methods-read-doc}/SKILL.md
-    └── note-makingmkl/   .claude-plugin/plugin.json + skills/note-makingmkl/SKILL.md + references/(preamble.tex, authoring_rules.md) + scripts/extract_source.sh
+    ├── note-makingmkl/   .claude-plugin/plugin.json + skills/note-makingmkl/SKILL.md + references/(preamble.tex, authoring_rules.md) + scripts/extract_source.sh
+    └── tex-notes-mkl/    .claude-plugin/plugin.json + skills/tex-notes-mkl/SKILL.md   (preamble template inside SKILL.md)
 ```
 
 ---
@@ -89,6 +92,7 @@ Add the marketplace once, then install whichever plugins you want:
 /plugin install ppt-mkl@skills-paper              # research presentations (PPTX + Beamer)
 /plugin install doc-tools@skills-paper            # doc reading / maintenance
 /plugin install note-makingmkl@skills-paper       # notes -> tight B&W LaTeX/PDF teaching notes
+/plugin install tex-notes-mkl@skills-paper        # short two-column equation-explainer notes (LaTeX/PDF)
 
 /plugin                                            # browse / manage installed plugins
 /plugin marketplace update skills-paper            # pull the latest after new commits

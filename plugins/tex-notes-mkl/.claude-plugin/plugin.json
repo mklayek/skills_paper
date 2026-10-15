@@ -1,0 +1,10 @@
+{
+  "name": "tex-notes-mkl",
+  "description": "Short, simplified two-column LaTeX/PDF lecture notes (11 pt, A4, Times) that explain what a source's equations mean and why they matter: every source equation with its number (chapter prefix dropped), 'Reading the equation' bullets, limiting cases, practical use, numerically verified algebra, 1-3 matplotlib figures computed from the equations, a summary table, a green key-message box and a navy 'in plain words' box, page-limit fitting and a required QA pass. Delivers the PDF plus its .tex source. Skills: `tex-notes-mkl`.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": ["notes", "latex", "pdf", "teaching", "equations", "geophysics", "matplotlib", "two-column"]
+}

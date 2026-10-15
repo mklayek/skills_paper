@@ -106,6 +106,15 @@
       "category": "documentation"
     },
     {
+      "name": "tex-notes-mkl",
+      "description": "Short, simplified two-column LaTeX/PDF lecture notes that explain what a source's equations mean and why they matter, with computed matplotlib figures, a summary table and key-message boxes; PDF + .tex. Skills: `tex-notes-mkl`.",
+      "source": "./plugins/tex-notes-mkl",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "teaching"
+    },
+    {
       "name": "ppt-to-pptx",
       "description": "Restyle/rebuild an existing PowerPoint (.pptx) into a clean styled deck (slide-for-slide, nothing left behind). Mode A: MKL lecture style with native OMML equations via ppt-mkl. Mode B: source-format-preserving — keep exact source fonts/sizes/word-colours, change only the layout (two-column: text left, figures right), re-author text screenshots as real runs, rebuild tables natively, verify with check-agents. Skills: `ppt-to-pptx-restyle`.",
       "source": "./plugins/ppt-to-pptx",
