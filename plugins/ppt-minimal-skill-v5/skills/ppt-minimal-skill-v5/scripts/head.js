@@ -76,7 +76,6 @@ function caption(s,cap,y){ s.addText(parse(cap.replace(/_([A-Za-zρθφ0-9])(?![
 function img(s,name,cap){ const [pw,ph]=SZ[name]; const sc=Math.min(R.w/pw,R.h/ph); const w=pw*sc,h=ph*sc;
   const x=R.x+(R.w-w)/2, y=R.y+(R.h-h)/2;
   s.addImage({path:`${IMG}/${name}.${SZ[name][2]||'png'}`,x,y,w,h,altText:cap||name});
-  s.addShape(pres.shapes.RECTANGLE,{x,y,w,h,fill:{type:'none'},line:{color:'CBD5E1',width:0.75}});
   if(cap) caption(s,cap); }
 function table(s,rows,colW,fs=13){
   const data=rows.map((r,i)=>r.map((c,j)=>({text:c,options:{fontFace:i===0?'Arial':'Times New Roman',fontSize:fs,bold:i===0||j===0,

@@ -52,6 +52,7 @@
 - **No figure may be left behind.** All figures from the source are used, with a coverage check showing none unused.
 - Each figure slide is **enriched with details**: what is plotted, what it shows and how to read it.
 - Image on the right half, text on the left half, aspect ratio kept, no overlap.
+- ❌ **No border around figures.** No outline rectangle, frame or picture border line.
 
 ## 🔤 6. Body text
 

@@ -66,6 +66,7 @@ Also read the built-in `pptx` skill's SKILL.md once for pptxgenjs gotchas (hex c
 - **No figure is left behind.** Every source figure is used once. `cover.py` must report **0 unused**.
 - Each figure slide gets **enriched bullets**: what is plotted (axes, units, parameters), what the curves show, how to read it or why it matters.
 - Image on the right half, text on the left half, aspect ratio kept, no overlap. Caption names the source and the content, never a figure number.
+- **No border around figures.** Place the image bare: no outline rectangle, frame, or picture border line.
 
 ### 6. 🔤 Body text
 - **Bullets 22 pt** (fonts still cycle Times New Roman → Comic Sans MS → Bookman Old Style). Symbol lines 20 pt. Equations 22 pt.
