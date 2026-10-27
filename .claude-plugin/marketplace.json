@@ -88,6 +88,15 @@
       "category": "presentation"
     },
     {
+      "name": "ppt-minimal-skill-v6",
+      "description": "v6 deck builder: the v5 house style plus arrow-chain slides. Each content slide is either source-style bullets or arrow chains (Concept -> mechanism -> meaning, Effect <- cause), with source wording kept, per-segment colors and alternating formats. Use when 'v6' or arrow-style slides are asked for (v5 stays the default). Skills: `ppt-minimal-skill-v6`.",
+      "source": "./plugins/ppt-minimal-skill-v6",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "presentation"
+    },
+    {
       "name": "ppt-minimal-mkl",
       "description": "Superseded by ppt-minimal-skill-v5 (the default deck builder). v4: minimal white teaching decks with level-marked titles, pattern dividers and native editable equations. Skills: `ppt-minimal-mkl`.",
       "source": "./plugins/ppt-minimal-mkl",

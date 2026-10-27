@@ -1,0 +1,10 @@
+{
+  "name": "ppt-minimal-skill-v6",
+  "description": "v6 of the teaching-deck builder: the exact v5 house style plus arrow-chain slides. Each content slide is chosen as either a source slide (bullets close to the source wording) or a chain slide (Concept -> mechanism -> meaning, or Effect <- cause, with the middle segment kept from the source sentence). Arrow direction is decided per bullet by a read-aloud test, every segment gets its own color and the formats alternate per bullet, and qa.py checks the chains. Use when asked for 'v6' or arrow-style slides. Skills: `ppt-minimal-skill-v6`.",
+  "version": "6.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": ["presentation", "slides", "pptx", "teaching", "lecture", "arrow-chain", "pptxgenjs", "equations", "omml", "geophysics"]
+}
