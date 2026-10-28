@@ -1,0 +1,23 @@
+{
+  "name": "ppt-minimal-skill-v7",
+  "description": "v7 of the teaching-deck builder: EVERY bullet is an arrow chain (Concept -> mechanism -> meaning, Effect <- cause), each bullet kept to one line (overflow goes to the next bullet), the class title slide and Thank you slide, per-topic title fonts, colors and title bullets (centered start, left continued, gold oval for key titles, black topic label for sub-parts), Figure captions under the image, continuous Times New Roman 18 pt symbol lines and no 'Definition:' subtitles. Use when 'v7' or all-arrow class decks are asked for. Skills: `ppt-minimal-skill-v7`.",
+  "version": "7.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": [
+    "presentation",
+    "slides",
+    "pptx",
+    "teaching",
+    "lecture",
+    "arrow-chain",
+    "pptxgenjs",
+    "equations",
+    "omml",
+    "geophysics",
+    "class-deck",
+    "one-line-bullets"
+  ]
+}

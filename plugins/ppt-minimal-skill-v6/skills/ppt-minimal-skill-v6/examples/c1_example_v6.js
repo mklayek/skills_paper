@@ -3,12 +3,12 @@
 // Every content slide is ONE kind. The comment above each call records the choice (V6.1).
 // Chain bullets: 2 or 3 segments, one arrow direction, middle segment keeps source words (V6.2, V6.3).
 
-// kind: source (title slide)
+// kind: source (introduction; the class title slide itself comes from frame.py)
 T('◆  Gravity Reductions',
   'From observed gravity to a Bouguer anomaly',[
   'Observed gravity contains effects of **latitude**, **elevation**, **topography** and **tides**, which must be removed before geological interpretation.',
   'The deck follows the source in order: latitude, free-air, Bouguer and terrain corrections.',
-  'Source: ' + SRC + ', chapter on gravity data reduction.']);
+  'Source: Telford, Geldart and Sheriff, Applied Geophysics, chapter on gravity data reduction.']);
 
 SEC('Elevation Corrections','Free-air correction · Bouguer correction · terrain correction');
 
@@ -33,8 +33,8 @@ T('■  Bouguer Correction','',[
   'Assumed density → a mean crustal value of 2.67 g/cm^{3} is often used → a wrong density leaves a residual correlated with topography',
   'Anomaly correlated with topography ← a Bouguer density that is too high or too low']);
 
-// kind: source (equation and how to use it)
-T('■  Bouguer Correction (continued)','',[
+// kind: source (equation and how to use it). A lettered sub-part of the topic -> black label (V6.7)
+T('■  Bouguer Correction › Slab Formula','',[
   'For an infinite horizontal slab of density ρ and thickness h:',
   '§ Δg_{B} = 0.04193 ρ h',
   '› Δg_{B} | Bouguer correction (mGal);  ρ | slab density (g/cm^{3});  h | slab thickness (m)',

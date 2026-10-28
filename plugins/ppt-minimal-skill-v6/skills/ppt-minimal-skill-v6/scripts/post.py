@@ -9,6 +9,7 @@ def kind(para, k):
     r = para.runs[0]
     if k == 0 and (r.font.underline or (r.font.size and r.font.size.pt == 18)): return 'sub'
     if r.font.name == 'Cambria Math': return 'eq'
+    if r.font.size and r.font.size.pt == 18 and r.font.name == 'Times New Roman': return 'sym'   # v7 symbol line
     if r.font.name in ('Cambria', 'Arial') and r.font.size and r.font.size.pt == 20: return 'sym'
     return 'bul'
 
@@ -41,11 +42,9 @@ for sl in p.slides:
                 spc('a:spcBef', 200); spc('a:spcAft', 400)
                 etree.SubElement(pPr, qn('a:buNone'))
             elif t == 'sym':
-                pPr.set('marL', '914400'); pPr.set('indent', '-228600'); spc('a:spcAft', 300)
-                c = etree.SubElement(pPr, qn('a:buClr'))
-                etree.SubElement(c, qn('a:srgbClr')).set('val', '0E7490')
-                etree.SubElement(pPr, qn('a:buFont')).set('typeface', 'Arial')
-                etree.SubElement(pPr, qn('a:buChar')).set('char', '▸')
+                # v7: no bullet, aligned with the equation it explains
+                pPr.set('marL', '457200'); pPr.set('indent', '0'); spc('a:spcAft', 400)
+                etree.SubElement(pPr, qn('a:buNone'))
             else:
                 pPr.set('marL', '285750'); pPr.set('indent', '-285750'); spc('a:spcAft', 600)
                 etree.SubElement(pPr, qn('a:buFont')).set('typeface', 'Arial')

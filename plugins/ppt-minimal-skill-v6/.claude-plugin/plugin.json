@@ -1,10 +1,22 @@
 {
   "name": "ppt-minimal-skill-v6",
-  "description": "v6 of the teaching-deck builder: the exact v5 house style plus arrow-chain slides. Each content slide is chosen as either a source slide (bullets close to the source wording) or a chain slide (Concept -> mechanism -> meaning, or Effect <- cause, with the middle segment kept from the source sentence). Arrow direction is decided per bullet by a read-aloud test, every segment gets its own color and the formats alternate per bullet, and qa.py checks the chains. Use when asked for 'v6' or arrow-style slides. Skills: `ppt-minimal-skill-v6`.",
-  "version": "6.0.0",
+  "description": "v6 of the teaching-deck builder: per-slide source or arrow-chain body text (Concept -> mechanism -> meaning, Effect <- cause, read-aloud test for the arrow, per-segment colors, alternating formats), now with the v7 frame and titles: the class title slide (method name, method group, Lecture NN, asked before building) and Thank you slide, per-topic title font, dark color and title bullet, centered topic start and left continued titles, light or no title fill, gold oval for key titles, black topic label for source sub-parts, Figure captions under the image and continuous Times New Roman 18 pt symbol lines. Skills: `ppt-minimal-skill-v6`.",
+  "version": "6.1.0",
   "author": {
     "name": "Mrinal Kanti Layek",
     "email": "layek.mk@gmail.com"
   },
-  "keywords": ["presentation", "slides", "pptx", "teaching", "lecture", "arrow-chain", "pptxgenjs", "equations", "omml", "geophysics"]
+  "keywords": [
+    "presentation",
+    "slides",
+    "pptx",
+    "teaching",
+    "lecture",
+    "arrow-chain",
+    "pptxgenjs",
+    "equations",
+    "omml",
+    "geophysics",
+    "class-deck"
+  ]
 }

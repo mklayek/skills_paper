@@ -6,9 +6,26 @@ from pptx import Presentation
 from pptx.util import Pt
 
 FN = sys.argv[1] if len(sys.argv) > 1 else 'Deck.pptx'
+# v7 symbol line: Times New Roman 18 pt, 'sym: meaning ; sym: meaning' (its ' ; ' separators are allowed)
+is_sym = lambda pa: bool(pa.runs) and pa.runs[0].font.size is not None and pa.runs[0].font.size.pt == 18 \
+    and pa.runs[0].font.name == 'Times New Roman'
 p = Presentation(FN)
 fail = []
 ok = lambda m: print('  OK   ' + m)
+from pptx.oxml.ns import qn
+
+
+def is_frame(sl):
+    return any(sh.name == 'Frame' for sh in sl.shapes)
+
+
+def is_divider(sl):
+    bg = sl._element.find('.//' + qn('p:bg'))
+    return bg is not None and bg.find('.//' + qn('a:blipFill')) is not None
+
+
+FRAME = {i for i, sl in enumerate(p.slides, 1) if is_frame(sl)}
+DIV = {i for i, sl in enumerate(p.slides, 1) if is_divider(sl)}
 
 
 def bad(m):
@@ -19,11 +36,12 @@ def bad(m):
 print('STRUCTURE')
 boxes_bad = []
 for i, sl in enumerate(p.slides, 1):
+    if i in FRAME: continue
     names = [sh.name for sh in sl.shapes if sh.has_text_frame]
     tx = [sh for sh in sl.shapes if sh.has_text_frame]
     if names.count('Title') != 1: boxes_bad.append(f'slide {i}: {names.count("Title")} Title')
     if names.count('Body') != 1: boxes_bad.append(f'slide {i}: {names.count("Body")} Body')
-    extra = [sh for sh in tx if sh.name not in ('Title', 'Body')]
+    extra = [sh for sh in tx if sh.name not in ('Title', 'Body', 'TopicLabel', 'Caption')]
     # an image caption is the only other text box allowed
     for e in extra:
         t = e.text_frame.text.strip()
@@ -43,11 +61,11 @@ titles = []
 for i, sl in enumerate(p.slides, 1):
     t = [sh for sh in sl.shapes if sh.name == 'Title']
     titles.append((i, t[0].text_frame.text.strip() if t else ''))
-content = [(i, t) for i, t in titles if t and t[0] in '◆■●']
-divider = [(i, t) for i, t in titles if t and t[0] not in '◆■●']
+content = [(i, t) for i, t in titles if i not in FRAME and i not in DIV]
+divider = [(i, t) for i, t in titles if i in DIV]
 numbered = [(i, t) for i, t in content if re.match(r'^[◆■●]\s+\d', t)]
 secnum = [(i, t) for i, t in content if re.search(r'\b\d+\.\d+\b', t)]
-ok(f'{len(content)} content titles carry a level marker, {len(divider)} dividers')
+ok(f'{len(content)} content titles, {len(divider)} dividers, {len(FRAME)} frame slides')
 bad(f'titles with a leading number: {numbered}') if numbered else ok('no numbered titles')
 bad(f'titles with a source section number: {secnum}') if secnum else ok('no source section numbers in titles')
 
@@ -109,35 +127,81 @@ nsub = [i for i, sl in enumerate(p.slides, 1) for sh in sl.shapes
 ok(f'{len(nsub)} slides keep a subtitle (title slide and named case histories)')
 
 # ------------------------------------------------------------ title fonts --
-print('TITLE FONTS (v2: Copperplate default, one font and color per section)')
-sec, seen, tbad = 0, {}, []
+print('TITLES (v7: one font + dark color per topic, centered start, left continued, light or no fill)')
+
+
+def lum(hx):
+    r, g, b_ = (int(hx[k:k + 2], 16) / 255 for k in (0, 2, 4))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b_
+
+
+MARKS = '◆■●▶❖✦▲◉➤✿'
+
+
+def strip(t):
+    t = t.lstrip('★').strip()
+    t = t[1:].strip() if t[:1] in MARKS else t
+    return re.sub(r' \(continued\)$', '', t)
+
+
+tbad, seen, prev, nfill, noval, nlab, fonts_order, marks_order, cur_mark = [], {}, None, 0, 0, 0, [], [], None
 for i, sl in enumerate(p.slides, 1):
+    if i in FRAME or i in DIV:
+        prev = None if i in DIV else prev
+        continue
     tt = [sh for sh in sl.shapes if sh.name == 'Title'][0]
-    txt = tt.text_frame.text.strip()
-    runs = tt.text_frame.paragraphs[0].runs
-    r = runs[-1]
+    lab = [sh for sh in sl.shapes if sh.name == 'TopicLabel']
+    oval = tt.shape_type == 1 and 'ellipse' in tt._element.xml[:3000]
+    para = tt.text_frame.paragraphs[0]
+    r = para.runs[-1]
     sig = (r.font.name, str(r.font.color.rgb))
-    if txt[:1] not in '◆■●':
-        sec += 1
-    if txt.endswith('Summary'):
-        key = 'summary'
+    topic = lab[0].text_frame.text.strip() if lab else strip(tt.text_frame.text.strip())
+    r0 = para.runs[0]
+    mark = (r0.text.strip(), str(r0.font.color.rgb)) if len(para.runs) > 1 and r0.text.strip() in MARKS else None
+    first = topic != prev
+    if lab and first: tbad.append((i, 'black label on the first slide of a topic'))
+    if lab:
+        nlab += 1
+        lr = lab[0].text_frame.paragraphs[0].runs[0]
+        if str(lab[0].fill.fore_color.rgb) != '000000' or str(lr.font.color.rgb) != 'FFFFFF':
+            tbad.append((i, 'topic label is not white text on black'))
+    if oval:
+        noval += 1
     else:
-        key = sec
-    if key in seen and seen[key] != sig: tbad.append((i, sig, seen[key]))
-    seen.setdefault(key, sig)
-fonts = {k: v[0] for k, v in seen.items()}
-if seen.get(0, ('',))[0] != 'Copperplate Gothic Bold' or seen.get('summary', ('',))[0] != 'Copperplate Gothic Bold':
-    tbad.append(('default', seen.get(0), seen.get('summary')))
-distinct = len(set(v for k, v in seen.items() if k not in (0, 1, 'summary')))
-bad(f'title font breaks: {tbad[:4]}') if tbad else ok(f'title fonts per section: {fonts}')
-ok(f'{distinct} distinct font/color pairs across sections 2 to {sec}')
+        al = para.alignment
+        want = 2 if first else 1                     # PP_ALIGN.CENTER = 2, LEFT = 1
+        if al is not None and int(al) != want:
+            tbad.append((i, ('start of topic must be centered' if first else 'continued topic must be left-aligned'), topic[:30]))
+        if tt.fill.type == 1:
+            nfill += 1
+            if lum(str(tt.fill.fore_color.rgb)) < 0.8: tbad.append((i, 'title fill is not light', str(tt.fill.fore_color.rgb)))
+    if lum(sig[1]) > 0.35: tbad.append((i, 'title text color is not dark', sig[1]))
+    if first:
+        if fonts_order and fonts_order[-1] == sig[0]: tbad.append((i, 'same title font as the previous topic', sig[0]))
+        if mark and marks_order and marks_order[-1] == mark: tbad.append((i, 'same title bullet as the previous topic', mark))
+        fonts_order.append(sig[0]); seen[(i, topic)] = sig
+        cur = sig
+        cur_mark = mark                                # None on an oval topic start
+        if mark: marks_order.append(mark)
+    elif sig != cur:
+        tbad.append((i, 'font/color differs within one topic', sig, cur))
+    elif mark and cur_mark and mark != cur_mark:
+        tbad.append((i, 'title bullet differs within one topic', mark, cur_mark))
+    elif mark and not cur_mark:
+        cur_mark = mark; marks_order.append(mark)      # topic opened with an oval: its bullet starts here
+    prev = topic
+bad(f'title rule breaks: {tbad[:5]}') if tbad else ok(f'{len(fonts_order)} topics, fonts follow the topic rule')
+ok(f'title bullets per topic: {" ".join(m[0] for m in marks_order)}')
+ok(f'{len(set(fonts_order))} distinct title fonts, {nfill} filled title boxes, {noval} oval titles, {nlab} black topic labels')
+if len(fonts_order) >= 3 and len(set(fonts_order)) < 3: bad('fewer than 3 distinct title fonts')
+if nfill > len(content) / 2: print('  NOTE more than half of the title boxes are filled: v7 keeps most of them unfilled')
 
 # ------------------------------------------------- semicolons and em dashes --
 print('WRITING (no semicolons, no em dashes)')
 pun = []
 for i, sl in enumerate(p.slides, 1):
     for sh in sl.shapes:
-        texts = [sh.text_frame.text] if sh.has_text_frame else []
+        texts = [pa.text for pa in sh.text_frame.paragraphs if not is_sym(pa)] if sh.has_text_frame else []
         if sh.has_table: texts += [c.text for r in sh.table.rows for c in r.cells]
         for x in texts:
             if ';' in x or '—' in x: pun.append((i, x[:60]))
@@ -150,12 +214,12 @@ wrong = []
 for i, sl in enumerate(p.slides, 1):
     b = [sh for sh in sl.shapes if sh.name == 'Body']
     if not b: continue
-    if titles[i - 1][1][:1] not in '◆■●': continue      # divider slides carry no bullets
+    if i in FRAME or i in DIV: continue      # divider and frame slides carry no bullets
     k = 0
     for j, pa in enumerate(b[0].text_frame.paragraphs):
         if not pa.runs or (j == 0 and sub(pa)): continue
         f = pa.runs[0].font
-        if f.name in ('Cambria Math', 'Cambria', 'Arial'): continue
+        if f.name in ('Cambria Math', 'Cambria', 'Arial') or is_sym(pa): continue
         if f.name != FONTS[k % 3]: wrong.append((i, j, f.name, FONTS[k % 3]))
         if f.size and f.size != Pt(22): wrong.append((i, j, 'size', f.size.pt))
         k += 1
@@ -165,13 +229,13 @@ bad(f'bullet font/size breaks: {wrong[:4]}') if wrong else ok('bullets follow th
 print('ARROW CHAINS (v6)')
 chain_sl, prose_sl, mixdir, samecol, mixed = [], [], [], [], []
 for i, sl in enumerate(p.slides, 1):
-    if titles[i - 1][1][:1] not in '◆■●': continue
+    if i in FRAME or i in DIV: continue
     b = [sh for sh in sl.shapes if sh.name == 'Body']
     if not b: continue
     nch = npl = 0
     for j, pa in enumerate(b[0].text_frame.paragraphs):
         if not pa.runs or (j == 0 and sub(pa)): continue
-        if pa.runs[0].font.name in ('Cambria Math', 'Cambria', 'Arial'): continue
+        if pa.runs[0].font.name in ('Cambria Math', 'Cambria', 'Arial') or is_sym(pa): continue
         t = pa.text
         if '→' in t or '←' in t:
             nch += 1
@@ -201,6 +265,19 @@ if chain_sl and not prose_sl or prose_sl and not chain_sl:
 print('SECTION DIVIDERS')
 divs = [i for i, t in divider]
 ok(f'dividers at slides {divs}') if divs else bad('no dividers')
+
+# ------------------------------------------------------------------ frame --
+print('FRAME SLIDES (v7: class title slide first, Thank you slide last)')
+n_sl = len(p.slides)
+if 1 in FRAME and n_sl in FRAME:
+    t1 = ' '.join(sh.text_frame.text for sh in p.slides[0].shapes if sh.has_text_frame)
+    tn = ' '.join(sh.text_frame.text for sh in p.slides[n_sl - 1].shapes if sh.has_text_frame)
+    if '{{' in t1 + tn: bad('unfilled {{TOKEN}} on a frame slide')
+    elif not re.search(r'Lecture \d{2}', t1): bad('title slide lacks "Lecture NN"')
+    elif 'Thank you' not in tn: bad('last slide is not the Thank you slide')
+    else: ok('title slide first, Thank you slide last, tokens filled: ' + re.search(r'Lecture \d{2}', t1).group(0))
+else:
+    bad(f'frame slides missing (title first: {1 in FRAME}, Thank you last: {n_sl in FRAME}): run frame.py and check Final.pptx')
 
 print()
 print(('ALL CHECKS PASSED' if not fail else f'{len(fail)} CHECK(S) FAILED'))

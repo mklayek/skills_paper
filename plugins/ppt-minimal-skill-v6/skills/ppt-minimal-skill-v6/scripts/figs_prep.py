@@ -87,7 +87,7 @@ for i, (p, c) in enumerate(zip([p_hex, p_diag, p_dots, p_waves, p_tri, p_circles
 print("✅ 7 divider patterns")
 
 sizes = {}
-for f in sorted(glob.glob(os.path.join(glob.escape(SRC), "fig_7_*"))):
+for f in sorted(glob.glob(os.path.join(glob.escape(SRC), "fig_*"))):
     name, ext = os.path.splitext(os.path.basename(f))
     shutil.copy(f, os.path.join(FIGS, os.path.basename(f)))
     w, h = Image.open(f).size

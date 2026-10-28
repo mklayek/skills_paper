@@ -89,8 +89,17 @@
     },
     {
       "name": "ppt-minimal-skill-v6",
-      "description": "v6 deck builder: the v5 house style plus arrow-chain slides. Each content slide is either source-style bullets or arrow chains (Concept -> mechanism -> meaning, Effect <- cause), with source wording kept, per-segment colors and alternating formats. Use when 'v6' or arrow-style slides are asked for (v5 stays the default). Skills: `ppt-minimal-skill-v6`.",
+      "description": "v6 deck builder: per-slide source or arrow-chain body text, plus the class title and Thank you slides, per-topic titles (fonts, title bullets, gold oval, black topic label), Figure captions and continuous symbol lines. Use when 'v6' or mixed arrow-style slides are asked for (v5 stays the default). Skills: `ppt-minimal-skill-v6`.",
       "source": "./plugins/ppt-minimal-skill-v6",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "presentation"
+    },
+    {
+      "name": "ppt-minimal-skill-v7",
+      "description": "v7 deck builder: every bullet an arrow chain on one line, the class title and Thank you slides, per-topic titles (fonts, title bullets, gold oval, black topic label), Figure captions and continuous symbol lines. Use when 'v7' or all-arrow class decks are asked for. Skills: `ppt-minimal-skill-v7`.",
+      "source": "./plugins/ppt-minimal-skill-v7",
       "author": {
         "name": "Mrinal Kanti Layek"
       },

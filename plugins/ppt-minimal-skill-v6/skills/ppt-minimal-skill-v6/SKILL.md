@@ -1,6 +1,6 @@
 ---
 name: "ppt-minimal-skill-v6"
-description: "Use when asked for a PPT, PPTX, deck, slides or teaching presentation whose body text should mix source-style bullets with arrow-chain bullets (Concept → mechanism → meaning, or Effect ← cause), colored and formatted differently on each side of the arrows, or when the user asks for 'v6', 'arrow style slides' or 'concept arrow bullets'. Same house style as ppt-minimal-skill-v5 (white minimal classroom .pptx from a PDF, scanned chapter, Markdown, Word, web page or topic)."
+description: "Use when asked for a PPT, PPTX, deck, slides or teaching presentation whose body text should mix source-style bullets with arrow-chain bullets (Concept → mechanism → meaning, or Effect ← cause), colored and formatted differently on each side of the arrows, or when the user asks for 'v6', 'arrow style slides' or 'concept arrow bullets'. Same house style as ppt-minimal-skill-v5 (white minimal classroom .pptx from a PDF, scanned chapter, Markdown, Word, web page or topic). Includes the class title slide and Thank you slide and per-topic title fonts like v7, with v6's mixed body text."
 ---
 
 # 📊 ppt-minimal-skill-v6: minimal teaching decks with arrow-chain slides
@@ -83,7 +83,72 @@ Read each arrow aloud. Pick the direction whose reading is true:
 
 ---
 
-# 📐 Inherited from v5 (unchanged)
+## ⭐ V6 frame, titles and captions (ported from v7 on 2026-10-28)
+
+Everything outside the body text box follows v7: the class title slide and Thank you slide, the per-topic title system, the Figure caption style and the equation symbol lines. **The body bullets stay v6**: source and chain slides mixed (V6.1), 22 pt body font cycle.
+
+### V6.6 🙋 Ask before building: method name, method group, lecture number
+The title slide shows three per-lecture texts. **Unless the user already gave all three in this chat, ask for them with AskUserQuestion before writing `deck_config.json`.** Offer your best reading of the source as the first option:
+
+| Field (`deck_config.json`) | Example | Where it shows |
+|---|---|---|
+| `method_name` | `IP Method`, `Electromagnetic Methods` | big white title |
+| `method_group` | `Electrical Methods` | red-on-yellow line under it |
+| `lecture` | `07` (two digits) | "… · Lecture 07" |
+
+- Never take the lecture number from an old deck, a folder name or a slot prefix on your own. A deck for "slot 06" may be lecture 07 this year.
+- If the user **explicitly** names where to take the values from or says not to ask ("use the number from the IP deck"), follow that, and state the three values in the delivery summary.
+- `Lecture NN` on the title slide is the **one number the no-numbers rule allows**.
+- Optional `title_photo`, `title_book` and `title_corner` replace the three title-slide pictures (field photo, textbook cover, corner diagram). Fill them in when the user gives method-specific images. Otherwise the class template pictures stay.
+
+### V6.7 🏷️ Titles: written as plain title strings, styled by `head.js`
+**Write titles only through the title string.** Never override `newSlide`, `SEC` or any other `head.js` function in a section file.
+
+A **topic** is the title without its level marker, without " (continued)" and without a " › sub-topic" part.
+
+| You write | Result |
+|---|---|
+| `'■  Membrane Polarization'` (topic differs from the previous slide) | **topic start**: title **centered**, the next font in the cycle and the next dark color |
+| `'■  Membrane Polarization (continued)'` | same topic: **left-aligned**, same font and color |
+| `'■  Membrane Polarization › Background Polarization'` on a later slide of that topic | **black label** (white text) at the top left reading "Membrane Polarization", and a left-aligned title "Background Polarization" with the topic's bullet |
+| the same `' › '` title on the topic's **first** slide | centered topic title. The sub-topic moves into the subtitle line. **No label**, since a label marks a topic that continues |
+| `'★■  Chargeability'` | **gold oval** title, centered, for a very important title (wide oval, long titles shrink to 16 pt to stay on one line) |
+
+- **Fonts cycle per topic**: Copperplate Gothic Bold → Bookman Old Style → MV Boli → Footlight MT Light → Copperplate Gothic Light → Rockwell → Book Antiqua → Californian FB. Two topics in a row never share a font. A divider (`SEC`) uses the font and color of the topic that follows it.
+- **Title bullets cycle per topic** too, each with its own color: ◆ red, ■ blue, ● green, ▶ purple, ❖ teal, ✦ orange, ▲ navy, ◉ rose, ➤ dark green, ✿ brown (Segoe UI Symbol, 20 pt). All slides of a topic share its bullet, and two topics in a row never share one. The ◆ ■ ● you write in a title string only switch the bullet on (no marker written = no bullet). The topic decides which glyph and color appear. The oval has no bullet.
+- **Dark text colors** cycle per topic: navy, dark red, dark green, dark purple, dark teal, brown, deep blue, dark rose, charcoal.
+- **Title boxes**: **no fill for most topics**. Every third topic gets a **light** fill (light yellow, light blue, light green, lavender, pink, sky, peach), kept on all of that topic's slides.
+- **Oval (`★`)**: use it for the **few titles the lecture hinges on**: the core mechanism of a section, the key definition, or the main take-home result. **At most one oval per section**, and never on two slides in a row. Not every topic start gets one. `★` may sit on any slide, "(continued)" ones included. The oval is always centered, and qa exempts it from the alignment rule.
+- **Black label (`›`), required for lettered sub-parts**: when a source section has sub-headings inside it ((a) General, (b) Biot–Savart law, (c) …), write the section as **one topic** and every later sub-part slide as `'■  Section name › Sub-part name'`, **not** as a separate `●` topic. Each such slide gets the small **black box with white text** at the top left naming the section (in the topic's font), and the sub-part as a left-aligned title below it. Its continuation slides keep the label: `'■  Section name › Sub-part name (continued)'`. On the section's own first slide the `›` part moves into the subtitle (a label only marks a topic that continues). Example:
+  ```
+  T('■  Description of EM Fields','',[…]);                                        // topic start, centered
+  S('■  Description of EM Fields › Biot–Savart Law','',[…],'fig_7_01','… | …');    // black label + sub-part title
+  T('■  Description of EM Fields › Biot–Savart Law (continued)','',[…]);          // label kept
+  ```
+- "(continued)" is added by the splitter or by you, never "(cont.)".
+- **A divider ends the topic.** The slide after `SEC` always starts a topic (centered, next font), even if its name repeats.
+- An **intro topic** before the first divider is optional. Add one only when the source has introductory text.
+- The Summary is an ordinary topic. `SUMMARY()` is kept only so v6 section files still run.
+
+### V6.8 🎓 Frame slides (`scripts/frame.py`, run by `build.sh`)
+- A long method name (e.g. "Electromagnetic Methods") is shrunk from 54 pt so it stays on one line and clear of the photos.
+- `frame.py Deck.pptx Final.pptx` copies the class **title slide** to the front and the **Thank you slide** to the end, shape by shape, from `frame_template.pptx`. Pictures, crops, highlights, fonts and colors stay identical, and every text stays an editable text box. It fills `{{METHOD}}`, `{{GROUP}}` and `{{LECTURE}}` from `deck_config.json`, and stops if one is missing.
+- **Copy `assets/frame_template.pptx` into `build/`** with the scripts. It was cut from slide 1 and the last slide of `PPT_class_kr\PPT\06_IP_Method_2026.pptx`, a **read-only folder: copy from it, never write to it**. If the class style changes, rebuild the template from a copy of the class deck: `python make_frame_template.py <copy_of_class_deck.pptx> frame_template.pptx`.
+- **Deliver `Final.pptx`.** `Deck.pptx` stays content-only, so the slide numbers used by `calibrate.py`, `measure.py`, `eqwidth.py` and `sheets.py` still match.
+- Do not write your own title or closing slide in the section files. The first section file starts with the first content topic.
+
+### V6.9 🖼️ Figure captions
+- **Figure captions**: write the caption as `'description | source'`, e.g. `'(a) V(t) compared with V_{c}, (b) integral of V(t) over a time interval | Telford, Geldart and Sheriff, Applied Geophysics'`. It renders as **Figure :** (bold italic) + the description (italic, near-black Arial 12 pt) + `(source)` in a different color and font (Agency FB, orange-brown), placed **directly under the image and left-aligned with it**. Never a figure number. Keep the description short, use (a), (b) for parts.
+
+### V6.9b 🔣 Equation symbol lines
+- Directly under the equation, one **continuous line** (wrapping onto more lines when long): `ρ_{dc}: apparent resistivity at dc ; FE: frequency effect`, in **Times New Roman 18 pt, black** (symbol bold), no ▸ bullets. Write them as before, `'› ρ_{dc} | apparent resistivity at dc;  FE | frequency effect'`. The ` ; ` separators are the one place a semicolon is allowed (qa skips symbol lines).
+
+### V6.10 ✅ Extra checks (run on `Final.pptx`)
+- `python qa.py Final.pptx` also fails on a font, color or title-bullet change inside a topic, two consecutive topics with one font or title bullet, a topic start that is not centered, a continued title that is not left-aligned, a fill that is not light, a title color that is not dark, a black label on a topic's first slide, and a missing title or Thank you slide or unfilled `{{TOKEN}}`.
+
+---
+
+# 📐 Inherited from v5 (amended where V6.6 to V6.10 differ)
 
 **Version 5 = `ppt-minimal-mkl` v4 (the base) + the user's PPT instructions** (`reference/PPT_INSTRUCTIONS.md`).
 Where v4 and v5 differ, **v5 wins**.
@@ -101,6 +166,8 @@ Use it when the user asks for a PowerPoint, PPTX, deck, slides or lecture from a
 | `reference/ARROW_NOTES_FORMAT.md` | The user's "Concept → principle → meaning" note format, the source of the V6 chain recipe |
 | `examples/apply_titles_example.py` | How source section names were mapped onto slide titles |
 | `reference/PPT_INSTRUCTIONS.md` | The user's instructions, verbatim, in a readable table form |
+| `assets/frame_template.pptx`, `scripts/frame.py` | Class title slide + Thank you slide, `Deck.pptx` → `Final.pptx` (V6.8) |
+| `scripts/make_frame_template.py` | Rebuilds the frame template from a copy of the class deck |
 
 Also read the built-in `pptx` skill's SKILL.md once for pptxgenjs gotchas (hex colors without `#`, `isTextBox: true`, the validate script).
 
@@ -125,12 +192,13 @@ Also read the built-in `pptx` skill's SKILL.md once for pptxgenjs gotchas (hex c
 - No **figure or table numbers** in slide text or captions. Also **crop printed captions and body text out of the figure images** themselves. Check every crop's bottom edge on a strip sheet.
 - No **section numbers**, including on divider slides (no "Section 3" line, the divider shows the section name only).
 - In-text cross references become plain words ("see the dipole slides"), never "Eq. (12)" or "Figure 7.3".
-- Check with `scripts/check_numbers.py Deck.pptx`. A bare value in a data-table cell (a gain of 7.20) is not a section number.
+- **Exception:** "Lecture NN" on the class title slide (V6.6).
+- Check with `scripts/check_numbers.py Final.pptx`. A bare value in a data-table cell (a gain of 7.20) is not a section number.
 
 ### 4. 🧮 Equations
 - **No source equation is left out.** Build an inventory of every display equation (`scripts/eq_inventory.py` → `eqinv.json`) and reference each in a slide as `'§#N'`. `scripts/cover.py` must report **0 missing**.
 - **Detailed derivations**: one step per line, each with a short bullet saying what was done ("Take the curl", "Substitute the Lorentz condition", "Let r ≫ λ").
-- **Symbols explained directly under each equation** in the ▸ style: symbol in **bold teal Cambria 20 pt**, then a colon and the meaning with units in Cambria 20 pt near-black. Write several symbols on one source line separated by `;`. The generator splits them into separate `▸` runs, so no semicolon reaches the slide.
+- **Symbols explained directly under each equation** as one continuous line `sym: meaning ; sym: meaning`, Times New Roman 18 pt black, symbol bold, no ▸ bullets (V6.9b). Write several symbols on one source line separated by `;`.
 - Equations are **native, editable PowerPoint equations** (OMML), 22 pt Cambria Math. Source LaTeX goes through `latexomml.py` (pandoc's docx writer → OMML). Hand-written linear `'§ …'` lines go through `omml.py` (v4 rules in §4b below still apply).
 - 🎨 **LHS and RHS in different colors, alternating sets on successive equations** (`scripts/eqcolor.py`, called by `inject.py`):
 
@@ -140,16 +208,16 @@ Also read the built-in `pptx` skill's SKILL.md once for pptxgenjs gotchas (hex c
   | 2nd, 4th, 6th … | 🔴 dark red `991B1B` | 🟢 green `16A34A` |
 
   The split is at the first relation sign (`= ≈ ≤ ≥ ∝ ≡ ≪ ≫ < >`), row by row in aligned blocks. An equation without a relation takes the LHS color.
-- An equation too wide for its box: rewrite it in `eqfix.json` (same id) as stacked fractions or with short helper symbols (p, q, u₁ …) and **define the helpers in a ▸ line**.
+- An equation too wide for its box: rewrite it in `eqfix.json` (same id) as stacked fractions or with short helper symbols (p, q, u₁ …) and **define the helpers in the symbol line**.
 
 ### 5. 🖼️ Figures
 - **No figure is left behind.** Every source figure is used once. `cover.py` must report **0 unused**.
 - Each figure slide gets **enriched bullets**: what is plotted (axes, units, parameters), what the curves show, how to read it or why it matters.
-- Image on the right half, text on the left half, aspect ratio kept, no overlap. Caption names the source and the content, never a figure number.
+- Image on the right half, text on the left half, aspect ratio kept, no overlap. Caption in the form `'description | source'` → **Figure :** description (source), directly under the image (V6.9), never a figure number.
 - **No border around figures.** Place the image bare: no outline rectangle, frame, or picture border line.
 
 ### 6. 🔤 Body text
-- **Bullets 22 pt** (fonts still cycle Times New Roman → Comic Sans MS → Bookman Old Style). Symbol lines 20 pt. Equations 22 pt.
+- **Bullets 22 pt** (fonts still cycle Times New Roman → Comic Sans MS → Bookman Old Style). Symbol lines 18 pt Times New Roman black (V6.9b). Equations 22 pt.
 - **No subtitle by default.** Pass `''` as the subtitle.
 - **Keep a subtitle where it is needed, mainly where a definition starts** ("Definition: the Lorentz condition", "Definitions: in-phase and quadrature"). Case histories may keep a subtitle naming the site. When used, the subtitle keeps v4's style cycle.
 - Text never shrinks below 22 pt. It moves to a continuation slide.
@@ -157,22 +225,7 @@ Also read the built-in `pptx` skill's SKILL.md once for pptxgenjs gotchas (hex c
 ### 7. 🏷️ Slide titles
 - **Use the source's section names as titles whenever possible**: the subsection name (■) or the lettered part name (●). Drop letters such as "(b)" and turn the book's semicolons into colons. Where no name fits (title slide, summary, numbered field examples, problems), keep a descriptive title.
 - **A topic that continues onto the next slide uses the same title plus " (continued)"**, for both automatic splits and hand splits. Never "(cont.)".
-- **Copperplate Gothic Bold is the default title font** (title slide, first section, Summary via `SUMMARY()`).
-- **Each section gets its own title font and color**, and the color changes when the section changes. Default table (`TF` in `scripts/head.js`), cycling by section index:
-
-  | Section index | Font | Color |
-  |---|---|---|
-  | 0, 1 (title, introduction), Summary | Copperplate Gothic Bold | navy `0B2A55` |
-  | 2 | Copperplate Gothic Light (bold) | red `B91C1C` |
-  | 3 | Rockwell | blue `1D4ED8` |
-  | 4 | Gill Sans MT | green `15803D` |
-  | 5 | Book Antiqua | purple `6D28D9` |
-  | 6 | Century | teal `0E7490` |
-  | 7 | Garamond (bold) | orange `C2410C` |
-  | 8 | Palatino Linotype | navy `0B2A55` |
-  | 9 | Trebuchet MS | red `B91C1C` |
-
-  Divider slides use their section's font and color for the section name. Title size auto-fits one line (18 to 28 pt). The ◆ ■ ● level markers stay (Arial, colored by level).
+- **Titles follow V6.7** (per-topic font, dark color, title bullet, centered start, left continued, light or no fill, gold oval `★`, black topic label `›`). The v5 per-section font table no longer applies.
 
 ### 8. ✍️ Writing
 - 🇺🇸 US English. **No em dashes. No semicolons** in slide text, captions and the MD copy (qa.py checks).
@@ -185,8 +238,8 @@ Also read the built-in `pptx` skill's SKILL.md once for pptxgenjs gotchas (hex c
 
 ### 10. ✅ Checks before delivery (all must pass)
 - `python cover.py`: 0 equations missing, 0 figures unused.
-- `python check_numbers.py Deck.pptx`: no equation, figure, table, page or section numbers, no footer fields.
-- `python qa.py Deck.pptx`: one Title and one Body per slide, 22 pt bullet cycle, title font per section, no semicolons or em dashes, US English, no raw markup.
+- `python check_numbers.py Final.pptx`: no equation, figure, table, page or section numbers, no footer fields.
+- `python qa.py Final.pptx`: one Title and one Body per slide, 22 pt bullet cycle, topic titles (V6.7), frame slides (V6.8), no semicolons or em dashes, US English, no raw markup.
 - `python measure.py`: no overflow in the linear LibreOffice render.
 - `powershell -File pp_export.ps1` then `python eqwidth.py`: in the **real PowerPoint render** nothing runs past the bottom (7.08 in), past the right margin, or from the left half into the image.
 - `python sheets.py <first> <last> 4 36`: **look at every slide once** on contact sheets.
@@ -197,7 +250,7 @@ Also read the built-in `pptx` skill's SKILL.md once for pptxgenjs gotchas (hex c
 
 ## 🔧 Build chain (scripts/)
 
-Run everything from `temp/<NN>_<name>/build/` after `npm install pptxgenjs` (or copy `node_modules`) and writing `deck_config.json` (see the example).
+Run everything from `temp/<NN>_<name>/build/` after `npm install pptxgenjs` (or copy `node_modules`), copying `assets/frame_template.pptx` next to the scripts and writing `deck_config.json` with the V6.6 fields (see the example).
 
 | Step | Command | What it does |
 |---|---|---|
@@ -206,11 +259,11 @@ Run everything from `temp/<NN>_<name>/build/` after `npm install pptxgenjs` (or 
 | 3 | `python figs_prep.py` | Divider patterns `sec0..sec6.png` + source figures into `<output>/figs`, `sizes.json` |
 | 4 | write `../sections/c1_*.js … cN_*.js` | Slides, in order (see `examples/c1_example.js`) |
 | 5 | `python calibrate.py` | Pass 1 without splitting on a tall page, measures each Body, writes `scale.json` for the splitter |
-| 6 | `./build.sh` | `assemble.sh` → `latexomml.py` → `eqmeta.py` → `node deck.js` → `post.py` → `inject.py` (+ `eqcolor.py`) → `deck_md.js` |
+| 6 | `./build.sh` | `assemble.sh` → `latexomml.py` → `eqmeta.py` → `node deck.js` → `post.py` → `inject.py` (+ `eqcolor.py`) → `deck_md.js` → `frame.py` (→ `Final.pptx`) |
 | 7 | checks of §10 | |
-| 8 | copy `Deck.pptx` to `<output>/<deck_name>.pptx` | The only file that leaves `temp/` |
+| 8 | copy **`Final.pptx`** to `<output>/<deck_name>.pptx` | The only file that leaves `temp/` |
 
-Section-file calls: `T(title, subtitle, items)` full width, `S(title, subtitle, items, fig, caption)` half + image, `TB(title, subtitle, items, rows, colW, caption, fontSize)` half + table, `SEC(name, contents)` divider, `SUMMARY()` before the closing slide.
+Section-file calls: `T(title, subtitle, items)` full width, `S(title, subtitle, items, fig, caption)` half + image, `TB(title, subtitle, items, rows, colW, caption, fontSize)` half + table, `SEC(name, contents)` divider. No title or closing slide in the sections, `frame.py` adds both (V6.8).
 Items: plain string = bullet (`**bold**`, `_{sub}`, `^{sup}` allowed), `'§#N'` = source equation N, `'§ …'` = linear equation (§4b), `'› sym | meaning;  sym | meaning'` = symbol lines.
 
 ---
@@ -223,15 +276,15 @@ Every intermediate file lives under `temp/<NN>_<short_name>/` with `sections/`, 
 ### 1. House style
 - **Canvas** `LAYOUT_WIDE` 13.333 × 7.5 in, **white** content slides, no bars, stripes or gradients. Only dividers carry a pattern.
 - **Exactly two text boxes per content slide**, `Title` (x 0.6, y 0.35, w 12.1, h 0.8) and `Body`, plus an optional image caption. No footer.
-- **Level markers** in titles: ◆ red = main topic, title slide and Summary. ■ blue = subsection. ● green = sub-subsection or lettered part. Never a section number in a title.
+- **Level markers** in titles: write ◆, ■ or ● to switch the title bullet on. Its glyph and color are chosen per topic (V6.7). Never a section number in a title.
 - **Bold key words** in bullets cycle red `B91C1C`, blue `1D4ED8`, green `15803D`, purple `6D28D9`. Plain text near-black `111827`.
 - **Half-and-half rule**: with an image, text left (x 0.6, w 5.9) and image right (x 6.85, y 1.35, w 5.9, h 5.2). Without, full-width Body (x 0.6, y 1.3, w 12.1, h 5.7). A table may take the right half.
-- **Captions** Arial 12 pt italic gray `374151` under the image, naming the source (no figure number, V5 §3). `_x` and `_{…}` in captions render as real subscripts.
+- **Captions** (V6.9): **Figure :** bold italic + description italic near-black Arial 12 pt + (source) in Agency FB orange-brown, directly under the image and left-aligned with it. `_x` and `_{…}` render as real subscripts.
 - **No slide-count limit.** Split, never shrink.
 
 ### 2. Section dividers
 - A pattern-filled divider before every main section (not before the title slide or Summary). Patterns and colors cycle hexagons/red, stripes/blue, dots/green, waves/purple, triangles/teal, arcs/orange, grid/navy (`figs_prep.py`), with a solid white panel and a 3 pt border in the section color.
-- Panel text: the **section name** large in the section's title font and color (V5 §7), and one line listing what the section covers in Verdana bold 18 pt. **No "Section N" line** (V5 §3).
+- Panel text: the **section name** large in the font and color of the topic that follows it (V6.7), and one line listing what the section covers in Verdana bold 18 pt. **No "Section N" line** (V5 §3).
 
 ### 3. Detail rule
 - Full, informative bullets from the source: definitions, mechanisms, numbers, ranges, units, authors and dates, and the reason behind each point.
@@ -240,7 +293,7 @@ Every intermediate file lives under `temp/<NN>_<short_name>/` with `sections/`, 
 
 ### 4a. Equation content
 - Every equation, plus intermediate derivation steps (V5 §4). Derivation slides full width, beside an image only if they fit.
-- If a printed symbol is ambiguous or a misprint, keep the source form and say so in the ▸ line.
+- If a printed symbol is ambiguous or a misprint, keep the source form and say so in the symbol line.
 
 ### 4b. Writing hand-made equations in linear form (`'§ …'`)
 - Unicode symbols directly (∇ ∂ ∑ ∫ ρ σ θ λ π Δ δ ∞ ≈ ≫ → ± × · ′ ″ ℓ √ ² ³ and `−` U+2212).
@@ -250,13 +303,13 @@ Every intermediate file lives under `temp/<NN>_<short_name>/` with `sections/`, 
 - **No equation number at the end** (V5 §3). One equation per line. A long equation may continue on the next `§` line starting with 4+ spaces or an operator.
 
 ### 5. Workflow
-1. Say in one sentence what you are building, then start (archive first if a deck exists, V5 §1).
-2. Make the folders (V5 §2), copy `scripts/` into `build/`, write `deck_config.json`.
+1. Ask for the method name, method group and lecture number (V6.6) unless the user gave them. Say in one sentence what you are building, then start (archive first if a deck exists, V5 §1).
+2. Make the folders (V5 §2), copy `scripts/` and `assets/frame_template.pptx` into `build/`, write `deck_config.json`.
 3. Get the source into Markdown with `$$…$$` equations (for scanned books use the Unlimited-OCR pipeline, see the `ocr-unlimited-ocr` memory). Keep raw dumps and renders in `extract/`.
-4. Run `eq_inventory.py`, `figs_prep.py`, `cover.py`. Plan the outline from `annotated.md`: title → per main section a divider, then its slides (concepts → definitions and equations with derivations → methods and equipment → procedure → interpretation and examples → practice) → Summary.
+4. Run `eq_inventory.py`, `figs_prep.py`, `cover.py`. Plan the outline from `annotated.md` (the title slide comes from `frame.py`): per main section a divider, then its slides (concepts → definitions and equations with derivations → methods and equipment → procedure → interpretation and examples → practice) → Summary.
 5. **Figures**, in order of preference: the user's own files (crop with a 5 % grid, trim whitespace, cut printed captions, check on contact sheets), attached photos, clean matplotlib diagrams (white background, labels ≥ 10 pt, 5.9 × 5.2 in). Never repeat an image.
 6. Write the section files, then calibrate, build and run every check in V5 §10. Fix, rebuild, recheck.
-7. Deliver: copy the deck to the output folder top, rebuild the MD copy, give a short summary (slide count, structure, where figures came from, anything assumed or unavailable). Mention that equations are native PowerPoint equations (they show as one-line text in Google Slides or LibreOffice).
+7. Deliver: copy `Final.pptx` to the output folder top under the deck name, rebuild the MD copy, give a short summary (slide count, structure, where figures came from, anything assumed or unavailable). Mention that equations are native PowerPoint equations (they show as one-line text in Google Slides or LibreOffice).
 
 ### 6. Content rules
 - Stay faithful to the source: its numbers, names, equations and tables. Credit figures in captions.
