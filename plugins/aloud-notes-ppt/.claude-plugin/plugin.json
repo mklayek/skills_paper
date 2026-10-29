@@ -1,0 +1,19 @@
+{
+  "name": "aloud-notes-ppt",
+  "description": "Read-aloud lecture notes from a PowerPoint deck: one spoken paragraph per slide that explains the slide, its findings and every equation, written as plain statements, statements with their consequence and equation readings (no stage directions, no questions). Copies and renders the deck (PowerPoint COM, never Quit), parallel writer brief, two-column Latin Modern XeLaTeX PDF with checks for paragraph length, glyphs, overfull lines, page count and slides per page. Skills: `aloud-notes-ppt`.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": [
+    "notes",
+    "pptx",
+    "lecture",
+    "read-aloud",
+    "teaching",
+    "latex",
+    "pdf",
+    "two-column"
+  ]
+}

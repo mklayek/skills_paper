@@ -133,6 +133,15 @@
       "category": "teaching"
     },
     {
+      "name": "aloud-notes-ppt",
+      "description": "Read-aloud lecture notes from a .pptx: one spoken paragraph per slide (statements, consequences, equation readings) built into a two-column Latin Modern PDF with page and length checks. Skills: `aloud-notes-ppt`.",
+      "source": "./plugins/aloud-notes-ppt",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "teaching"
+    },
+    {
       "name": "ppt-to-pptx",
       "description": "Restyle/rebuild an existing PowerPoint (.pptx) into a clean styled deck (slide-for-slide, nothing left behind). Mode A: MKL lecture style with native OMML equations via ppt-mkl. Mode B: source-format-preserving — keep exact source fonts/sizes/word-colours, change only the layout (two-column: text left, figures right), re-author text screenshots as real runs, rebuild tables natively, verify with check-agents. Skills: `ppt-to-pptx-restyle`.",
       "source": "./plugins/ppt-to-pptx",
