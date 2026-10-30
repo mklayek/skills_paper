@@ -8,6 +8,7 @@ Reads <task_folder>/docs/notes_config.json:
   parts           {"<first slide of a part>": "<part heading>"}  (the deck's section names)
   fontsize        10, 11 or 12 (pt)
   words           [min, max] words per paragraph, display equations not counted
+  insight_words   [min, max] words of the optional second paragraph "**Insight:** ..." (default [15, 45])
   max_pages       0 = no limit
   slides_per_page [min, max], [0, 0] = no check
   margin_cm       page margin, default 1.0
@@ -34,6 +35,7 @@ C = json.load(io.open(os.path.join(DOCS, "notes_config.json"), encoding="utf-8")
 NAME, SKIP = C["name"], set(C.get("skip", []))
 PARTS = {int(k): v for k, v in C.get("parts", {}).items()}
 WMIN, WMAX = C.get("words", [85, 140])
+IMIN, IMAX = C.get("insight_words", [15, 45])
 slides = json.load(io.open(os.path.join(EXT, "slides.json"), encoding="utf-8"))
 content = [s["n"] for s in slides if s["n"] not in SKIP]
 problems = 0
@@ -50,18 +52,29 @@ print(f"🔍 {len(blocks)} slide blocks for {len(content)} content slides"
       + (f", ❌ missing {missing}" if missing else ", ✅ none missing") + (f", ⚠️ not expected {extra}" if extra else ""))
 problems += len(missing)
 MATH = r"\$\$[\s\S]*?\$\$|\$[^$]*\$"
+n_ins = 0
 for n, b in sorted(blocks.items()):
     paras = [p for p in b.split("\n\n")[1:] if p.strip()]
-    words = len(re.sub(MATH, "x", " ".join(paras)).split())
+    ins = [p for p in paras if p.lstrip().startswith("**Insight:**")]      # optional second paragraph
+    main = [p for p in paras if not p.lstrip().startswith("**Insight:**")]
+    words = len(re.sub(MATH, "x", " ".join(main)).split())
     body = re.sub(MATH, "", b)
     msg = []
-    if len(paras) != 1: msg.append(f"{len(paras)} paragraphs")
+    if len(main) != 1: msg.append(f"{len(main)} paragraphs")
     if not WMIN <= words <= WMAX: msg.append(f"{words} words")
+    if len(ins) > 1: msg.append(f"{len(ins)} insights")
+    if ins and not paras[-1].lstrip().startswith("**Insight:**"): msg.append("insight not after the paragraph")
+    if ins:
+        iw = len(re.sub(MATH, "x", ins[0]).split()) - 1
+        n_ins += 1
+        if not IMIN <= iw <= IMAX: msg.append(f"insight {iw} words")
     if "—" in body: msg.append("em dash")
     if ";" in body: msg.append("semicolon")
     if re.search(r"\*\*(What to say|How to explain|Findings|Significance)", b): msg.append("label")
     if msg:
         problems += 1; print(f"⚠️  slide {n}: " + ", ".join(msg))
+
+print(f"💡 {n_ins} of {len(blocks)} slides carry an Insight paragraph")
 
 # ----------------------------------------------------------------- master MD --
 date = "".join(f"  {l}\\\n" for l in C.get("affiliation", [])) + f"  {C.get('year', '')}"

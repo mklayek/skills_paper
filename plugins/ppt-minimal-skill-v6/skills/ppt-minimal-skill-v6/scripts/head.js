@@ -135,9 +135,11 @@ function body(s, subtitle, items, box){ let si=(n-1)%SUBS.length;
   s.addText(arr,{...box,valign:'top',margin:[4,4,4,4],isTextBox:true,objectName:'Body',fit:'none'}); }
 // v7 caption: 'description | source' -> Figure : description (source), Figure bold italic, description italic
 // near-black, source in Agency FB orange-brown, placed directly under the image and left-aligned with it.
+// caption text starts with a capital letter after 'Figure : ' (a leading part label such as '(a) ' stays as is)
+function capFirst(t){ return t.replace(/^(\s*(?:\([a-z]\)\s*)?)([a-z])/, (m,p,c)=>p+c.toUpperCase()); }
 function caption(s,cap,y,x,w){ const [d,src]=cap.split(/\s*\|\s*/); const u=t=>t.replace(/_([A-Za-zρθφ0-9])(?![{])/g,'_{$1}');
   const runs=[{text:'Figure : ',options:{fontFace:'Arial',fontSize:12,bold:true,italic:true,color:INK}},
-    ...parse(u(d),{fontFace:'Arial',fontSize:12,italic:true,color:INK},INK)];
+    ...parse(capFirst(u(d)),{fontFace:'Arial',fontSize:12,italic:true,color:INK},INK)];
   if(src) runs.push({text:'  ('+src+')',options:{fontFace:'Agency FB',fontSize:12,color:'C2410C'}});
   s.addText(runs,{x:x??R.x,y:y??R.y+R.h+0.08,w:w??R.w,h:0.5,margin:0,valign:'top',isTextBox:true,objectName:'Caption'}); }
 function captionOld(s,cap,y){ s.addText(parse(cap.replace(/_([A-Za-zρθφ0-9])(?![{])/g,'_{$1}'),{fontFace:'Arial',fontSize:12,italic:true,color:MUTED},MUTED),{x:R.x,y:y??R.y+R.h+0.08,w:R.w,h:0.45,fontFace:'Arial',fontSize:12,italic:true,color:MUTED,margin:0,valign:'top',isTextBox:true}); }

@@ -38,15 +38,34 @@ making slides (use the PPT skills) or equation-explainer notes from a book passa
      images (title slide, section dividers, closing "Thank you" slide).
    - `parts`: `{"<first slide of the part>": "<divider title>"}`, taken from the divider slides.
    - `title`, `subtitle`, `author`, `affiliation`, `year`: ask the user only if the deck and chat do not give them.
-   - `fontsize` (default 12), `words` (default `[85, 140]`), `max_pages`, `slides_per_page`, `margin_cm`.
+   - `fontsize` (default 12), `words` (default `[85, 140]`), `insight_words` (default `[15, 45]`), `max_pages`,
+     `slides_per_page`, `margin_cm`.
 4. **Write** with writer agents when the deck has more than about 12 content slides: split the content slides into
    groups of 7 to 9 and dispatch the groups in parallel. Each prompt is `reference/WRITER_BRIEF.md` pasted in full plus
    the slide numbers, the input paths and the output file `sections/<first slide>_slides_<letter>.md`. If the user gives
    richer source notes (detailed teaching notes, a book chapter), add their path as an input.
-5. **Build** and fix until the script prints **ALL CHECKS PASSED**: one paragraph per content slide, word range, no em
+5. **Build** and fix until the script prints **ALL CHECKS PASSED**: one paragraph per content slide (plus at most one
+   **Insight:** paragraph after it), word ranges, no em
    dash or semicolon, no leftover labels, 0 missing glyphs, 0 overfull lines, page and slides-per-page limits.
 6. **Look** at two rendered pages (`pdftoppm -r 60 -f 1 -l 2`).
 7. **Report**: path, pages, slides per page, any slide issues the writers flagged, choices made.
+
+## 💡 Insight paragraph (default on)
+
+Each slide block may end with a **second paragraph** starting with `**Insight:**`: 1 or 2 sentences (15 to 45 words)
+with an intuition, a field or processing tip, a pitfall, a link to another step, or why the result matters. Writers
+add it on most slides (`reference/WRITER_BRIEF.md`). It renders as its own paragraph with a bold label, is checked
+against `insight_words`, and does not count toward `words`. Write it as a plain Markdown paragraph, never with raw
+TeX such as `\par`. The build prints how many slides carry one. Insights add about 20 % to the page count.
+
+```markdown
+## Slide 20 · Chargeability M
+
+Chargeability $M$ is the most common time-domain ... the classic pointer to disseminated sulfides.
+
+**Insight:** Two surveys can only be compared when their integration windows match, so I always note the receiver
+window next to every chargeability value.
+```
 
 ## Fitting page limits
 
