@@ -1,7 +1,7 @@
 {
   "name": "png-derivations",
   "description": "One 16:9 PNG of a whole derivation in a textbook flow: white background, up to three columns, numbered headings (no 'step' labels), every displayed equation numbered fresh from (1) in red after a dashed leader, boxed results and colored highlights, built with pdflatex (Times) and pdftoppm, with one-page and overfull-box checks. Skills: `png-derivations`.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Mrinal Kanti Layek",
     "email": "layek.mk@gmail.com"
