@@ -158,6 +158,15 @@
         "name": "Mrinal Kanti Layek"
       },
       "category": "writing"
+    },
+    {
+      "name": "png-explain",
+      "description": "One 16:9 infographic-style explainer PNG (2560x1440) comparing 2 or 3 concepts side by side: white page with a navy border, bold black title with one red accent word, header-pill panels with a definition, a TikZ/circuitikz or Python or downloaded figure, a boxed equation with symbol list, Key points and Example boxes with icons, and a full-width comparison table. Mostly black text, color only to highlight. Python SPEC -> LaTeX (tcolorbox, fontawesome5) with auto-fit to one page, plus .tex and .md copies. Skills: `png-explain`.",
+      "source": "./plugins/png-explain",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "writing"
     }
   ]
 }

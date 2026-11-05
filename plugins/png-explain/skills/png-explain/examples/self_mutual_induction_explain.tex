@@ -1,0 +1,68 @@
+\documentclass{article}
+\usepackage[paperwidth=16in,paperheight=9in,margin=0.32in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.96]{helvet}\renewcommand{\familydefault}{\sfdefault}
+\usepackage[table]{xcolor}
+\usepackage{amsmath,amssymb,graphicx,array,tabularx,enumitem,adjustbox}
+\usepackage[most]{tcolorbox}
+\usepackage{fontawesome5}
+\usepackage{tikz}\usepackage[siunitx,american]{circuitikz}
+\usetikzlibrary{arrows.meta,decorations.markings,calc}
+\pagestyle{empty}\setlength{\parindent}{0pt}\setlength{\parskip}{0pt}
+\definecolor{ink}{HTML}{111111}\definecolor{subgray}{HTML}{4B5563}\definecolor{rulegray}{HTML}{D1D5DB}
+\definecolor{pageframe}{HTML}{0B2A55}
+\definecolor{blue}{HTML}{1D4ED8}
+\definecolor{red}{HTML}{B91C1C}
+\definecolor{green}{HTML}{15803D}
+\definecolor{purple}{HTML}{6D28D9}
+\definecolor{orange}{HTML}{C2410C}
+\definecolor{teal}{HTML}{0E7490}
+\definecolor{navy}{HTML}{0B2A55}
+\definecolor{rose}{HTML}{BE185D}
+\color{ink}\hyphenpenalty=10000\exhyphenpenalty=10000
+\colorlet{pc}{blue}
+\newcommand{\kw}[1]{\textcolor{pc}{\textbf{#1}}}
+\newcommand{\hl}[1]{\textcolor{red}{#1}}
+\newcommand{\pill}[3]{\tikz[baseline=(p.base)]\node[fill=#1,text=white,rounded corners=3pt,inner xsep=7pt,inner ysep=3pt,font=\bfseries\fontsize{12.5}{14}\selectfont](p){#2\ \MakeUppercase{#3}};}
+\setlist[itemize]{leftmargin=1.05em,itemsep=2pt,topsep=1pt,parsep=0pt,label=\textcolor{pc}{\textbullet}}
+\tcbset{panel/.style={enhanced,halign=left,colback=white,colframe=#1,boxrule=1.3pt,arc=6pt,
+  left=9pt,right=9pt,top=13pt,bottom=7pt,fonttitle=\bfseries\fontsize{16}{18}\selectfont,coltitle=white,
+  attach boxed title to top center={yshift=-3.2mm},
+  boxed title style={colback=#1,colframe=#1,arc=4pt,boxrule=0pt,left=10pt,right=10pt,top=2pt,bottom=2pt}},
+  small/.style={enhanced,halign=left,colback=white,colframe=#1,boxrule=0.9pt,arc=4pt,left=6pt,right=6pt,top=4pt,bottom=4pt}}
+\begin{document}
+\begin{tikzpicture}[remember picture,overlay]
+\draw[pageframe,line width=2.6pt,rounded corners=4pt] ([shift={(0.13in,-0.13in)}]current page.north west) rectangle ([shift={(-0.13in,0.13in)}]current page.south east);
+\end{tikzpicture}%
+
+{\centering\fontsize{34}{38}\selectfont\bfseries Self Induction \hl{\&} Mutual Induction\par}\vspace{4pt}
+{\centering\tikz[baseline=-0.6ex]\draw[subgray,line width=0.8pt](0,0)--(1.6in,0);\ \ {\fontsize{14}{16}\selectfont\color{subgray}\MakeUppercase{Electromagnetism · Inductance}}\ \ \tikz[baseline=-0.6ex]\draw[subgray,line width=0.8pt](0,0)--(1.6in,0);\par}\vspace{10pt}
+\begin{minipage}[t]{0.491\linewidth}{\colorlet{pc}{blue}\begin{tcolorbox}[panel=blue,title=\MakeUppercase{Self induction},equal height group=panels]{\fontsize{13.5}{17.0}\selectfont Self induction is the phenomenon in which a changing current in a coil induces an emf in the \kw{same coil}.\par}\vspace{6pt}\begin{minipage}[c]{0.56\linewidth}{\fontsize{12.5}{14.5}\selectfont\begin{adjustbox}{max width=\linewidth,max height=2.10in,center}
+\begin{circuitikz}[line width=1.1pt, scale=1.4]
+\draw (0,0) to[battery1, l_=$\mathcal{E}$] (0,1.6) -- (0.2,1.6) to[cspst, l=$S$] (1.5,1.6) -- (1.88,1.6);
+\foreach \k in {0,...,13} \draw[line width=1.4pt] ({2.0+0.28*\k},1.6) ellipse (0.12 and 0.55);
+\draw (5.76,1.6) -- (6.3,1.6) -- (6.3,0) -- (0,0);
+\draw[blue, dashed, line width=0.9pt] (3.82,1.6) ellipse (2.45 and 0.95);
+\draw[blue, dashed, line width=0.9pt] (3.82,1.6) ellipse (2.95 and 1.3);
+\node[blue] at (7.05,1.6) {\Large$\Phi$};
+\draw[red, -{Latex[length=3mm]}, line width=1.5pt] (2.3,3.25) -- (5.4,3.25) node[midway, above] {changing current $I$};
+\node at (1.72,2.45) {\Large$L$};
+\node at (3.82,-0.5) {induced emf opposes the change (Lenz's law)};
+\end{circuitikz}\end{adjustbox}}\end{minipage}\hfill\begin{minipage}[c]{0.41\linewidth}\begin{tcolorbox}[small=blue,halign=center,top=6pt,bottom=6pt]{\fontsize{21}{25}\selectfont$\displaystyle e=-L\,\frac{dI}{dt}$}\end{tcolorbox}\par\vspace{4pt}{\fontsize{12.5}{15.5}\selectfont\begin{tabular}{@{}r@{\ }c@{\ }>{\raggedright\arraybackslash}p{0.70\linewidth}@{}}$e$ & : & induced emf (V)\\[1pt]$L$ & : & self inductance (H)\\[1pt]$dI/dt$ & : & rate of change of current (A/s)\end{tabular}\par}\end{minipage}\par\vspace{7pt}\begin{minipage}[t]{0.49\linewidth}\begin{tcolorbox}[small=blue,equal height group=sub0]\pill{blue}{\faKey}{Key points}\par\vspace{4pt}{\fontsize{13.0}{15.5}\selectfont \begin{itemize}\item Also called the \kw{back emf}.\item Depends on the number of turns, the area of the coil and the core material.\item Unit of inductance: henry (H).\end{itemize}}\end{tcolorbox}\end{minipage}\hfill\begin{minipage}[t]{0.49\linewidth}{\colorlet{pc}{green}\begin{tcolorbox}[small=green,equal height group=sub0]\pill{green}{\faLightbulb[regular]}{Example}\par\vspace{4pt}{\fontsize{13.0}{15.5}\selectfont \begin{itemize}\item Switch on a fan or a motor: the current does not rise instantly.\item Self induction resists the sudden change.\end{itemize}}\end{tcolorbox}}\end{minipage}\end{tcolorbox}}\end{minipage}\hfill\begin{minipage}[t]{0.491\linewidth}{\colorlet{pc}{red}\begin{tcolorbox}[panel=red,title=\MakeUppercase{Mutual induction},equal height group=panels]{\fontsize{13.5}{17.0}\selectfont Mutual induction is the phenomenon in which a changing current in one coil induces an emf in \kw{another nearby coil}.\par}\vspace{6pt}\begin{minipage}[c]{0.56\linewidth}{\fontsize{12.5}{14.5}\selectfont\begin{adjustbox}{max width=\linewidth,max height=2.10in,center}
+\begin{circuitikz}[line width=1.1pt, scale=1.4]
+\draw (0,0) to[sV] (0,1.6) -- (0.78,1.6);
+\foreach \k in {0,...,6} \draw[line width=1.4pt] ({0.9+0.26*\k},1.6) ellipse (0.12 and 0.55);
+\draw (2.58,1.6) -- (2.9,1.6) -- (2.9,0) -- (0,0);
+\foreach \k in {0,...,6} \draw[line width=1.4pt] ({3.9+0.26*\k},1.6) ellipse (0.12 and 0.55);
+\draw (3.78,1.6) -- (3.5,1.6) -- (3.5,0) -- (6.3,0) -- (6.3,0.45);
+\draw (5.58,1.6) -- (6.3,1.6) -- (6.3,1.15);
+\draw[fill=white] (6.3,0.8) circle (0.35) node {$e_2$};
+\draw[blue, dashed, line width=0.9pt] (3.2,1.6) ellipse (2.75 and 1.0);
+\node[blue] at (3.2,2.85) {\Large$\Phi$};
+\draw[red, -{Latex[length=2.5mm]}, line width=1.5pt] (0.15,2.0) -- (0.75,2.0) node[left=7mm, red] {$I_1$};
+\node[align=center] at (1.68,3.35) {primary coil\\($N_1$ turns)};
+\node[align=center] at (4.68,3.35) {secondary coil\\($N_2$ turns)};
+\node at (3.2,-0.5) {changing $I_1$ induces an emf in the secondary coil};
+\end{circuitikz}\end{adjustbox}}\end{minipage}\hfill\begin{minipage}[c]{0.41\linewidth}\begin{tcolorbox}[small=red,halign=center,top=6pt,bottom=6pt]{\fontsize{21}{25}\selectfont$\displaystyle e_2=-M\,\frac{dI_1}{dt}$}\end{tcolorbox}\par\vspace{4pt}{\fontsize{12.5}{15.5}\selectfont\begin{tabular}{@{}r@{\ }c@{\ }>{\raggedright\arraybackslash}p{0.70\linewidth}@{}}$e_2$ & : & induced emf in the secondary (V)\\[1pt]$M$ & : & mutual inductance (H)\\[1pt]$dI_1/dt$ & : & rate of change of the primary current (A/s)\end{tabular}\par}\end{minipage}\par\vspace{7pt}\begin{minipage}[t]{0.49\linewidth}\begin{tcolorbox}[small=red,equal height group=sub1]\pill{red}{\faKey}{Key points}\par\vspace{4pt}{\fontsize{13.0}{15.5}\selectfont \begin{itemize}\item Needs \kw{two coils}.\item Depends on the distance between the coils, the number of turns and the core material.\item The basis of transformers.\end{itemize}}\end{tcolorbox}\end{minipage}\hfill\begin{minipage}[t]{0.49\linewidth}{\colorlet{pc}{orange}\begin{tcolorbox}[small=orange,equal height group=sub1]\pill{orange}{\faLightbulb[regular]}{Example}\par\vspace{4pt}{\fontsize{13.0}{15.5}\selectfont \begin{itemize}\item A transformer moves energy from one coil to the other.\item No direct electrical connection between the coils.\end{itemize}}\end{tcolorbox}}\end{minipage}\end{tcolorbox}}\end{minipage}
+\par\vspace{10pt}\begin{tcolorbox}[panel=navy,title=\MakeUppercase{Self induction vs mutual induction},top=12pt,bottom=4pt]{\fontsize{13.5}{16.5}\selectfont\renewcommand{\arraystretch}{1.25}\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.4in}*{2}{>{\centering\arraybackslash}X}@{}} & \textcolor{blue}{\textbf{Self induction}} & \textcolor{red}{\textbf{Mutual induction}}\\\arrayrulecolor{rulegray}\hline \textbf{Coils} & One coil & Two coils\\\arrayrulecolor{rulegray}\hline \textbf{Emf induced in} & The same coil & The second coil\\\arrayrulecolor{rulegray}\hline \textbf{Cause} & Its own current change & Current change in the nearby coil\\\arrayrulecolor{rulegray}\hline \textbf{Example} & Inductor, choke & Transformer\\\end{tabularx}}\end{tcolorbox}
+\end{document}
