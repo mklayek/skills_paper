@@ -106,6 +106,15 @@
       "category": "presentation"
     },
     {
+      "name": "ppt-minimal-skill-v8",
+      "description": "v8 deck builder: v7 all-arrow class style with one wrapping bullet per chain, label-only continued slides, fixed body boxes, 22 pt same-topic slide fill, black body text in nine random fonts, optional frame slides. Use when 'v8' or filled all-arrow class decks are asked for. Skills: `ppt-minimal-skill-v8`.",
+      "source": "./plugins/ppt-minimal-skill-v8",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "presentation"
+    },
+    {
       "name": "ppt-minimal-mkl",
       "description": "Superseded by ppt-minimal-skill-v5 (the default deck builder). v4: minimal white teaching decks with level-marked titles, pattern dividers and native editable equations. Skills: `ppt-minimal-mkl`.",
       "source": "./plugins/ppt-minimal-mkl",

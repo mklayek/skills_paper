@@ -1,0 +1,24 @@
+{
+  "name": "ppt-minimal-skill-v8",
+  "description": "v8 of the teaching-deck builder: v7 all-arrow-chain class style with each chain one wrapping bullet, continued slides showing only the black topic label (no title box), fixed body boxes (6.53 x 13.07 in topic start, 6.87 x 13.04 in continued, half width with a figure), 22 pt slides filled from the next slides of the same topic, black body bullets in nine random fonts that never repeat on consecutive bullets, bold underlined '#' sub-points and optional class frame slides. Use when 'v8' or filled all-arrow class decks are asked for. Skills: `ppt-minimal-skill-v8`.",
+  "version": "8.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": [
+    "presentation",
+    "slides",
+    "pptx",
+    "teaching",
+    "lecture",
+    "arrow-chain",
+    "pptxgenjs",
+    "equations",
+    "omml",
+    "geophysics",
+    "class-deck",
+    "slide-fill",
+    "random-fonts"
+  ]
+}
