@@ -6,6 +6,7 @@ Only the COPY is opened in PowerPoint. The script closes only that copy and neve
 other open presentations stay open. The original deck is never opened or written.
 
 Usage:  python extract_deck.py <deck.pptx> <task_folder>
+        Give Windows paths (D:/...). In Git Bash a /d/... path can turn into D:\\d\\... and land in the wrong folder.
 Output: <task_folder>/temp/extract/{deck_copy.pptx, deck_copy.pdf, slides/slide_NN.png, slides.json, slides_text.md}
         <task_folder>/docs/notes_config.json   (template, only if it does not exist yet)
 """
@@ -76,7 +77,8 @@ if not os.path.exists(cfg):
     base = os.path.splitext(os.path.basename(SRC))[0]
     json.dump({"name": f"{base}_Read_Aloud_Notes", "title": f"{base}: Read-Aloud Notes",
                "subtitle": "One spoken paragraph per slide", "author": "", "affiliation": [], "year": "",
-               "skip": cand, "parts": {}, "fontsize": 12, "words": [85, 140], "insight_words": [15, 45], "max_pages": 0,
-               "slides_per_page": [0, 0]},
+               "range": [1, len(out)], "skip": cand, "parts": {}, "fontsize": 13, "title_pt": 15,
+               "write_space_cm": 1.2, "after_space_cm": 1.0, "margin_cm": 1.0, "words": [60, 115],
+               "insight_words": [15, 45], "max_pages": 0, "slides_per_page": [0, 0]},
               io.open(cfg, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"🔧 wrote config template {cfg}: fill title, author, skip, parts before building")

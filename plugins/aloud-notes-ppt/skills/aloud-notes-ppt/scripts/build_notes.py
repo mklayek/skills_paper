@@ -4,19 +4,23 @@
 Reads <task_folder>/docs/notes_config.json:
   name            output base name (PDF at the top of the task folder, master MD in docs/)
   title, subtitle, author, affiliation (list of lines), year
+  range           [first, last] slide numbers covered by the notes, default all slides
   skip            slide numbers with no paragraph (title, section dividers, closing slide)
   parts           {"<first slide of a part>": "<part heading>"}  (the deck's section names)
-  fontsize        10, 11 or 12 (pt)
+  fontsize        body size in pt, any value (KOMA class scrartcl), default 13
+  title_pt        size of the bold two-line heading (title line + subtitle line), default 15
+  write_space_cm  blank space under every slide heading for handwritten notes, default 1.2
+  after_space_cm  blank space after each slide block (after the Insight paragraph), default 1.0
   words           [min, max] words per paragraph, display equations not counted
   insight_words   [min, max] words of the optional second paragraph "**Insight:** ..." (default [15, 45])
   max_pages       0 = no limit
   slides_per_page [min, max], [0, 0] = no check
-  margin_cm       page margin, default 1.0
+  margin_cm       page margin on all four sides, default 1.0
 
 Checks: one block per content slide, exactly one paragraph per block, word range, no em dash, no semicolon
 outside math, 0 missing glyphs, 0 overfull lines, page count and slides per page.
-Layout: A4, two columns, Latin Modern, navy part headings, blue slide headings, no header,
-page number alone in the bottom-right corner.
+Layout: A4, two columns, Latin Modern, compact two-line bold navy title, navy part headings, blue slide headings
+with a writing gap under them and a gap after each block, no header, page number alone in the bottom-right corner.
 
 Usage:  python build_notes.py <task_folder>
 """
@@ -37,7 +41,11 @@ PARTS = {int(k): v for k, v in C.get("parts", {}).items()}
 WMIN, WMAX = C.get("words", [85, 140])
 IMIN, IMAX = C.get("insight_words", [15, 45])
 slides = json.load(io.open(os.path.join(EXT, "slides.json"), encoding="utf-8"))
-content = [s["n"] for s in slides if s["n"] not in SKIP]
+LO, HI = C.get("range", [1, 10 ** 6])
+content = [s["n"] for s in slides if LO <= s["n"] <= HI and s["n"] not in SKIP]
+FS = C.get("fontsize", 13)
+TPT, GAP = C.get("title_pt", 15), C.get("write_space_cm", 1.2)
+AFTER = C.get("after_space_cm", 1.0)
 problems = 0
 
 # ------------------------------------------------------------- collect blocks --
@@ -98,12 +106,18 @@ io.open(hdr, "w", encoding="utf-8").write(r"""
 \usepackage{eso-pic}\AddToShipoutPictureFG{\AtPageLowerLeft{\put(\LenToUnit{\paperwidth-0.7cm},\LenToUnit{0.45cm}){\makebox[0pt][r]{\normalfont\small\color{black}\thepage}}}}
 \usepackage{titlesec}
 \titleformat{\section}{\Large\bfseries\color[HTML]{0B2A55}}{}{0pt}{}[\titlerule]
-\titleformat{\subsection}{\normalsize\bfseries\color[HTML]{1D4ED8}}{}{0pt}{\Needspace{5\baselineskip}}
-\titlespacing*{\section}{0pt}{4pt}{1pt}\titlespacing*{\subsection}{0pt}{3pt}{0pt}
+\titleformat{\subsection}{\normalsize\bfseries\color[HTML]{1D4ED8}}{}{0pt}{\Needspace{8\baselineskip}}
+\titlespacing*{\section}{0pt}{4pt}{1pt}\titlespacing*{\subsection}{0pt}{AFTERcm}{GAPcm}
+\makeatletter
+\renewcommand\maketitle{\twocolumn[{\centering
+  {\fontsize{TPT}{TLEAD}\selectfont\bfseries\color[HTML]{0B2A55}\@title\\\@subtitle\par}\vspace{3pt}
+  {\small\@author\par}\vspace{1pt}{\footnotesize\@date\par}\vspace{3pt}\hrule\vspace{6pt}}]}
+\makeatother
 \setlength{\parindent}{0pt}\raggedbottom\setlength{\abovedisplayskip}{4pt}\setlength{\belowdisplayskip}{4pt}
 \setcounter{secnumdepth}{0}
 \setlength{\parskip}{1.5pt}
-""" + "\n".join(rf"\newunicodechar{{{c}}}{{\ensuremath{{{m}}}}}" for c, m in [
+""".replace("AFTER", str(AFTER)).replace("GAP", str(GAP)).replace("TLEAD", str(round(TPT * 1.18, 1))).replace("TPT", str(TPT))
+  + "\n".join(rf"\newunicodechar{{{c}}}{{\ensuremath{{{m}}}}}" for c, m in [
     # text-mode Greek and relation glyphs only. Never map big operators (integral, partial, sum, infinity,
     # square root): with unicode-math that recurses forever and XeLaTeX hangs.
     ("ρ", r"\rho"), ("σ", r"\sigma"), ("φ", r"\phi"), ("ω", r"\omega"), ("τ", r"\tau"), ("μ", r"\mu"), ("Ω", r"\Omega"),
@@ -114,7 +128,8 @@ io.open(hdr, "w", encoding="utf-8").write(r"""
     ("⁴", r"^{4}"), ("⁵", r"^{5}"), ("⁶", r"^{6}"), ("°", r"^{\circ}"), ("′", r"'"), ("∼", r"\sim"), ("ℓ", r"\ell")]) + "\n")
 tex = os.path.join(BUILD, NAME + ".tex")
 subprocess.run(["pandoc", mdp, "-o", tex, "--standalone", "--pdf-engine=xelatex", "-H", hdr,
-                "-V", "documentclass=article", "-V", "classoption=twocolumn", "-V", f"fontsize={C.get('fontsize', 12)}pt",
+                "-V", "documentclass=scrartcl", "-V", "classoption=twocolumn",
+                "-V", f"fontsize={FS}pt",
                 "-V", "papersize=a4", "-V", f"geometry:margin={C.get('margin_cm', 1.0)}cm", "-V", "geometry:columnsep=0.5cm",
                 "-V", "mainfont=Latin Modern Roman", "-V", "mathfont=Latin Modern Math"], check=True, cwd=DOCS)
 for k in (1, 2):

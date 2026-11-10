@@ -14,6 +14,22 @@ Model sentence from the user: *"The Sun rises in the east, and for this we have 
 needs a consequence: *"The Sun rises in the east."* is a full sentence too, and so is *"We can get an idea from this
 equation that if x rises, y falls."*
 
+## 🎨 Page style (v1.1, the user's teaching-note layout)
+
+| Element | Style | Config key (default) |
+|---|---|---|
+| Title block | two tight bold navy lines: title, then subtitle, crisp and small, then author, affiliation, year in small type | `title_pt` (15) |
+| Body text | Latin Modern, two columns, KOMA class `scrartcl` so any size works | `fontsize` (13) |
+| Margins | 1 cm on all four sides | `margin_cm` (1.0) |
+| Writing gap under each slide heading | blank space for the lecturer's handwritten notes | `write_space_cm` (1.2) |
+| Gap after each slide block | blank space after the Insight paragraph, before the next slide heading | `after_space_cm` (1.0) |
+| Page number | alone in the bottom-right corner, no header or footer text | always |
+| Slide range | notes for part of a deck, e.g. slides 46 to 85 | `range` ([1, last]) |
+| Paragraph length | crisp | `words` ([60, 115]) |
+
+The user's words in the chat override these defaults. Keep a project rules file (`docs/NOTES_STYLE_AND_RULES.md`) when
+the user asks for one, listing their requests and the config values used.
+
 **Not for:** detailed teaching notes with several labeled paragraphs per slide (what to say, how to explain, findings),
 making slides (use the PPT skills) or equation-explainer notes from a book passage (`tex-notes-mkl`).
 
@@ -34,12 +50,14 @@ making slides (use the PPT skills) or equation-explainer notes from a book passa
 2. **Never write into the deck's folder when it is protected** (for example `PPT_class_kr\PPT\`). `extract_deck.py`
    copies the deck and opens only the copy. It never calls PowerPoint `Quit`.
 3. **Configure** `docs/notes_config.json`:
+   - `range`: the slides the user asked for (default all). Only slides inside it get a block.
    - `skip`: slides with no paragraph. The script proposes candidates with almost no text. Confirm them against the
      images (title slide, section dividers, closing "Thank you" slide).
    - `parts`: `{"<first slide of the part>": "<divider title>"}`, taken from the divider slides.
    - `title`, `subtitle`, `author`, `affiliation`, `year`: ask the user only if the deck and chat do not give them.
-   - `fontsize` (default 12), `words` (default `[85, 140]`), `insight_words` (default `[15, 45]`), `max_pages`,
-     `slides_per_page`, `margin_cm`.
+   - layout keys from the page-style table above (`fontsize` 13, `title_pt` 15, `write_space_cm` 1.2,
+     `after_space_cm` 1.0, `margin_cm` 1.0), plus `words` (default `[60, 115]`), `insight_words` (default `[15, 45]`),
+     `max_pages`, `slides_per_page`.
 4. **Write** with writer agents when the deck has more than about 12 content slides: split the content slides into
    groups of 7 to 9 and dispatch the groups in parallel. Each prompt is `reference/WRITER_BRIEF.md` pasted in full plus
    the slide numbers, the input paths and the output file `sections/<first slide>_slides_<letter>.md`. If the user gives
@@ -73,9 +91,9 @@ Slides per page and page count trade against font size and length. The build scr
 
 | Need | Change, in this order |
 |---|---|
-| fewer pages | `margin_cm` 1.0, then `words` max down by 15, then `fontsize` down |
+| fewer pages | `after_space_cm` and `write_space_cm` down (only if the user agrees, they are writing space), then `words` max down by 15, then `fontsize` down |
 | last page nearly empty | same as above, a small cut is often enough |
-| bigger type | `fontsize` 12 raises pages by about 40 % compared with 10 pt |
+| bigger type | each pt of `fontsize` adds about 15 % pages. 13 pt with the writing gaps gives about 4 slides per page |
 
 Arithmetic first: 54 content slides cannot give 7 per page on 8 pages (that needs 56). When the user's limits conflict,
 build the closest version and ask which limit wins (AskUserQuestion).
@@ -93,6 +111,8 @@ build the closest version and ask which limit wins (AskUserQuestion).
 | editing the build output by hand | edit `sections/*.md` or the config, then rebuild |
 | heredoc or sed edits on LaTeX in Markdown | backslashes get eaten: edit with the Edit tool or a Python file |
 | mapping ∫ ∂ Σ ∞ √ with `newunicodechar` | XeLaTeX hangs under unicode-math. The script maps only Greek and relation glyphs |
+| `/d/...` paths from Git Bash to `extract_deck.py` | the output lands in `D:\d\...`. Pass Windows paths (`D:/...`) |
+| notes for a slide range written for every slide | set `range`, and put only the dividers inside the range in `skip` |
 
 ## Files
 - `scripts/extract_deck.py`: copy, export through PowerPoint, render, dump text, write the config template.
@@ -101,4 +121,4 @@ build the closest version and ask which limit wins (AskUserQuestion).
 - `examples/sample_paragraphs.md`: two finished paragraphs (a mechanism slide and an equation slide).
 
 Requirements: Windows with PowerPoint (export), Python with `python-pptx` and `pymupdf`, pandoc, XeLaTeX with Latin
-Modern and `eso-pic`.
+Modern, KOMA-Script (`scrartcl`) and `eso-pic`.
