@@ -176,6 +176,15 @@
         "name": "Mrinal Kanti Layek"
       },
       "category": "writing"
+    },
+    {
+      "name": "explain-slide-pptx",
+      "description": "Editable 16:9 PowerPoint explain slides in the png-explain infographic style: navy border, bold title with one accent word, a 'What is X?' intro strip, 1 to 4 header-pill panels with definition, figure + credit, native PowerPoint equation box (LaTeX -> OMML via pandoc), symbol list, Key points and Example boxes. One slide or a whole set from a Python spec, with color palettes that cycle or switch per slide (outline or tinted fill, text color). Text heights are measured so the layout flows and overflow is reported, plus a PowerPoint export for visual QA. Ships the explain-slides-maker agent. Skills: `explain-slide-pptx`.",
+      "source": "./plugins/explain-slide-pptx",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "writing"
     }
   ]
 }
