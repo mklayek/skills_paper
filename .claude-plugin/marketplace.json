@@ -185,6 +185,15 @@
         "name": "Mrinal Kanti Layek"
       },
       "category": "writing"
+    },
+    {
+      "name": "tex-notes-detailed-mkl",
+      "description": "Detailed two-column, colored LaTeX/PDF study notes (11 pt, A4, Latin Modern, page numbers) with no page limit: physics first, then every equation with 'Reading it' bullets, worked numbers checked in Python, nuance boxes, matplotlib figures drawn at print size and TikZ diagrams with all figure text at least 10 pt. Abbreviations spelled out only at first use (acronym package), references as Eq. (n), Table n and Fig. n with numbered captions in the same column, reference list on a separate final page, required QA pass. Skills: `tex-notes-detailed-mkl`.",
+      "source": "./plugins/tex-notes-detailed-mkl",
+      "author": {
+        "name": "Mrinal Kanti Layek"
+      },
+      "category": "writing"
     }
   ]
 }

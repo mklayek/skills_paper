@@ -1,0 +1,10 @@
+{
+  "name": "tex-notes-detailed-mkl",
+  "description": "Detailed two-column, colored LaTeX/PDF study notes (11 pt, A4, Latin Modern, page numbers) with no page limit: physics first, then every equation with 'Reading it' bullets, worked numbers checked in Python, nuance boxes, own-work boxes, matplotlib figures drawn at print size and TikZ diagrams with all figure text at least 10 pt. Abbreviations are spelled out only at first use (acronym package), references are cited as Eq. (n), Table n and Fig. n with numbered captions kept in the same column, and the reference list sits on a separate final page. Includes a required QA pass. Skills: `tex-notes-detailed-mkl`.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Mrinal Kanti Layek",
+    "email": "layek.mk@gmail.com"
+  },
+  "keywords": ["notes", "latex", "pdf", "two-column", "tikz", "matplotlib", "acronyms", "geophysics", "teaching", "study-notes"]
+}
