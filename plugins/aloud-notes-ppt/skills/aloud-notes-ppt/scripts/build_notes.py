@@ -11,14 +11,21 @@ Reads <task_folder>/docs/notes_config.json:
   title_pt        size of the bold two-line heading (title line + subtitle line), default 15
   write_space_cm  blank space under every slide heading for handwritten notes, default 1.2
   after_space_cm  blank space after each slide block (after the Insight paragraph), default 1.0
-  words           [min, max] words per paragraph, display equations not counted
+  words           [min, max] words per main paragraph, display equations not counted, default [45, 240]
   insight_words   [min, max] words of the optional second paragraph "**Insight:** ..." (default [15, 45])
   max_pages       0 = no limit
   slides_per_page [min, max], [0, 0] = no check
   margin_cm       page margin on all four sides, default 1.0
+  math_runs       {"<first slide>": <last slide>} runs of derivation slides summarized in ONE block on the first
+                  slide (the later slides of a run are skipped automatically), default none
+  math_words      [min, max] words of a mathematics summary block, default [40, 68]
+  math_max_lines  most printed lines a mathematics summary may take in the PDF, default 8 (0 = no check)
 
 Checks: one block per content slide, exactly one paragraph per block, word range, no em dash, no semicolon
-outside math, 0 missing glyphs, 0 overfull lines, page count and slides per page.
+outside math, 0 missing glyphs, 0 overfull lines, page count and slides per page. Before the build the section
+files are checked for control characters (a shell ate a backslash: \b, \t, \r), old font commands (\rm \bf \it,
+fatal under KOMA) and broken dark-red significance markup \textcolor[HTML]{8B0000}{...}. Mathematics blocks must
+carry "(slides ...)" in the heading, no Insight, no display equation, and fit math_max_lines printed lines.
 Layout: A4, two columns, Latin Modern, compact two-line bold navy title, navy part headings, blue slide headings
 with a writing gap under them and a gap after each block, no header, page number alone in the bottom-right corner.
 
@@ -38,8 +45,14 @@ os.makedirs(BUILD, exist_ok=True)
 C = json.load(io.open(os.path.join(DOCS, "notes_config.json"), encoding="utf-8"))
 NAME, SKIP = C["name"], set(C.get("skip", []))
 PARTS = {int(k): v for k, v in C.get("parts", {}).items()}
-WMIN, WMAX = C.get("words", [85, 140])
+WMIN, WMAX = C.get("words", [45, 240])
 IMIN, IMAX = C.get("insight_words", [15, 45])
+MRUNS = {int(k): int(v) for k, v in C.get("math_runs", {}).items()}   # first slide -> last slide of a math run
+for a, z in MRUNS.items():
+    SKIP |= set(range(a + 1, z + 1))
+MWMIN, MWMAX = C.get("math_words", [40, 68])
+MLINES = C.get("math_max_lines", 8)
+SIG = r"\textcolor[HTML]{8B0000}{"                                    # dark-red significance sentence
 slides = json.load(io.open(os.path.join(EXT, "slides.json"), encoding="utf-8"))
 LO, HI = C.get("range", [1, 10 ** 6])
 content = [s["n"] for s in slides if LO <= s["n"] <= HI and s["n"] not in SKIP]
@@ -51,7 +64,28 @@ problems = 0
 # ------------------------------------------------------------- collect blocks --
 text = ""
 for f in sorted(glob.glob(os.path.join(glob.escape(ROOT), "sections", "*.md"))):
-    text += io.open(f, encoding="utf-8").read().strip() + "\n\n"
+    t = io.open(f, encoding="utf-8").read()
+    base = os.path.basename(f)
+    for m in re.finditer(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", t):
+        problems += 1
+        print(f"❌ {base}: control character {m.group()!r} near {t[max(0, m.start() - 25):m.start()]!r} "
+              "(a shell ate a backslash, fix it with the Edit tool)")
+    for m in re.finditer(r"\\(rm|bf|it|tt|sf)\b", t):
+        problems += 1
+        print(f"❌ {base}: old font command \\{m.group(1)} near {t[max(0, m.start() - 25):m.end() + 10]!r} "
+              "(use \\mathrm{...}, \\mathbf{...})")
+    k = t.find(SIG)
+    while k >= 0:
+        i, depth = k + len(SIG), 1
+        while i < len(t) and depth:
+            depth += {"{": 1, "}": -1}.get(t[i], 0)
+            i += 1
+        inner = t[k + len(SIG):i - 1]
+        if depth or "\n" in inner or "**" in inner:
+            problems += 1
+            print(f"❌ {base}: broken significance markup near {t[k:k + 70]!r} (unclosed, line break or ** inside)")
+        k = t.find(SIG, i)
+    text += t.strip() + "\n\n"
 blocks = {int(re.match(r"## Slide (\d+)", b).group(1)): b.strip()
           for b in re.split(r"(?m)^(?=## Slide \d+)", text) if b.startswith("## Slide")}
 missing = [n for n in content if n not in blocks]
@@ -69,7 +103,12 @@ for n, b in sorted(blocks.items()):
     body = re.sub(MATH, "", b)
     msg = []
     if len(main) != 1: msg.append(f"{len(main)} paragraphs")
-    if not WMIN <= words <= WMAX: msg.append(f"{words} words")
+    if n in MRUNS:                                                    # mathematics summary block
+        if not MWMIN <= words <= MWMAX: msg.append(f"math summary {words} words (allowed {MWMIN}-{MWMAX})")
+        if "(slides" not in b.split("\n", 1)[0]: msg.append('math heading without "(slides ...)"')
+        if ins: msg.append("Insight on a math summary")
+        if "$$" in b: msg.append("display equation in a math summary")
+    elif not WMIN <= words <= WMAX: msg.append(f"{words} words")
     if len(ins) > 1: msg.append(f"{len(ins)} insights")
     if ins and not paras[-1].lstrip().startswith("**Insight:**"): msg.append("insight not after the paragraph")
     if ins:
@@ -83,6 +122,10 @@ for n, b in sorted(blocks.items()):
         problems += 1; print(f"⚠️  slide {n}: " + ", ".join(msg))
 
 print(f"💡 {n_ins} of {len(blocks)} slides carry an Insight paragraph")
+n_sig = text.count(SIG)
+n_sig_sl = sum(1 for n, b in blocks.items() if n not in MRUNS and SIG in b)
+print(f"🔴 {n_sig} dark-red significance sentences on {n_sig_sl} of {len(blocks) - len(MRUNS)} non-math slides"
+      + (f", {len(MRUNS)} mathematics summary blocks" if MRUNS else ""))
 
 # ----------------------------------------------------------------- master MD --
 date = "".join(f"  {l}\\\n" for l in C.get("affiliation", [])) + f"  {C.get('year', '')}"
@@ -145,7 +188,13 @@ print("✅ 0 missing characters" if not miss else f"❌ missing characters: {mis
 print("✅ 0 overfull lines" if not over else f"❌ overfull lines (pt, tex line): {over}  -> split those display equations")
 problems += bool(miss) + len(over)
 pdf = os.path.join(ROOT, NAME + ".pdf")
-shutil.copy2(os.path.join(BUILD, NAME + ".pdf"), pdf)
+try:
+    shutil.copy2(os.path.join(BUILD, NAME + ".pdf"), pdf)
+except PermissionError:                                               # the PDF is open in a viewer
+    problems += 1
+    print(f"❌ could not overwrite {pdf}: it is open in a PDF viewer. Close it and run again. "
+          "Checking the build copy instead.")
+    pdf = os.path.join(BUILD, NAME + ".pdf")
 
 # ------------------------------------------------------------- page checks --
 doc = fitz.open(pdf)
@@ -158,5 +207,34 @@ if smax and any(not smin <= p <= smax for p in per):
     problems += 1; print(f"❌ slides per page outside {smin}..{smax}")
     if smin * len(doc) > len(content):
         print(f"⚠️  {len(content)} slides cannot give {smin}+ per page on {len(doc)} pages: change fontsize, margin or words")
+if MRUNS and MLINES:                                                  # printed lines of each math summary
+    rows = {}
+    for pi, pg in enumerate(doc):
+        mid = pg.rect.width / 2
+        for bl in pg.get_text("dict")["blocks"]:
+            for ln in bl.get("lines", []):
+                sp = [s for s in ln["spans"] if s["text"].strip()]
+                if not sp or (ln["bbox"][1] > pg.rect.height - 40 and "".join(s["text"] for s in sp).strip().isdigit()):
+                    continue
+                key = (pi, ln["bbox"][0] >= mid - 5, round(ln["bbox"][3]))          # one printed row
+                rows.setdefault(key, []).append((ln["bbox"][0], "".join(s["text"] for s in ln["spans"]),
+                                                 sp[0]["font"].endswith("Bold")))
+    cur, count = None, {}
+    for key in sorted(rows):
+        parts = sorted(rows[key])
+        t, bold = " ".join(p[1] for p in parts).strip(), parts[0][2]
+        if bold:
+            m = re.match(r"Slide\s*(\d+)", t)
+            if m:
+                cur = int(m.group(1)) if int(m.group(1)) in MRUNS else None
+                if cur: count[cur] = 0
+            elif t.startswith("Insight"):
+                cur = None
+            continue
+        if cur is not None:
+            count[cur] += 1
+    bad = {n: c for n, c in count.items() if c > MLINES}
+    print(f"🧮 math summary lines {count}" + (f", ❌ over {MLINES}: {bad}" if bad else f", ✅ all within {MLINES}"))
+    problems += len(bad)
 print(f"📦 {pdf}")
 print("✅ ALL CHECKS PASSED" if not problems else f"❌ {problems} problem(s) above")

@@ -143,7 +143,7 @@
     },
     {
       "name": "aloud-notes-ppt",
-      "description": "Read-aloud lecture notes from a .pptx: one spoken paragraph per slide (statements, consequences, equation readings) built into a two-column Latin Modern PDF with page and length checks. Skills: `aloud-notes-ppt`.",
+      "description": "Teaching notes from a .pptx: one paragraph per slide covering every point, dark-red significance sentences, one short summary per run of derivation slides, built into a two-column Latin Modern PDF with coverage, line-count and markup checks. Skills: `aloud-notes-ppt`.",
       "source": "./plugins/aloud-notes-ppt",
       "author": {
         "name": "Mrinal Kanti Layek"

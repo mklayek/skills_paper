@@ -75,10 +75,11 @@ print(f"🔍 skip candidates (title / divider / closing, check the images): {can
 cfg = os.path.join(ROOT, "docs", "notes_config.json")
 if not os.path.exists(cfg):
     base = os.path.splitext(os.path.basename(SRC))[0]
-    json.dump({"name": f"{base}_Read_Aloud_Notes", "title": f"{base}: Read-Aloud Notes",
-               "subtitle": "One spoken paragraph per slide", "author": "", "affiliation": [], "year": "",
+    json.dump({"name": f"{base}_Teaching_Notes", "title": base,
+               "subtitle": "Teaching notes", "author": "", "affiliation": [], "year": "",
                "range": [1, len(out)], "skip": cand, "parts": {}, "fontsize": 13, "title_pt": 15,
-               "write_space_cm": 1.2, "after_space_cm": 1.0, "margin_cm": 1.0, "words": [60, 115],
-               "insight_words": [15, 45], "max_pages": 0, "slides_per_page": [0, 0]},
+               "write_space_cm": 1.2, "after_space_cm": 1.0, "margin_cm": 1.0, "words": [45, 240],
+               "insight_words": [15, 45], "math_runs": {}, "math_words": [40, 60], "math_max_lines": 8,
+               "max_pages": 0, "slides_per_page": [0, 0]},
               io.open(cfg, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"🔧 wrote config template {cfg}: fill title, author, skip, parts before building")
